@@ -1,17 +1,28 @@
-import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { Suspense } from "react";
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
 import VideoPlayer from "@/components/VideoPlayer";
 import Hero from "@/components/Hero";
 import HookTop from "@/components/HookTop";
 import WhyUs from "@/components/WhyUs";
 import HookBottom from "@/components/HookBottom";
+import ProductSlider from "@/components/ProductSlider";
+import Testimonial from "@/components/Testimonial";
+import Article from "@/components/Article";
+
+import { getGuestToken } from "@/utils/guestToken";
+import JoinAF from "@/components/JoinAF";
 
 export default function Home() {
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const guestToken = getGuestToken();
+    setToken(guestToken);
+  }, []);
+
   return (
     <>
-      <Navbar />
       <section>
         <Suspense fallback={<div>Loading...</div>}>
           <VideoPlayer />
@@ -29,7 +40,18 @@ export default function Home() {
       <section>
         <HookBottom />
       </section>
-      <Footer />
+      <section>
+        <ProductSlider />
+      </section>
+      <section>
+        <Testimonial />
+      </section>
+      <section className="absolute w-full mx-auto ">
+        <JoinAF />
+      </section>
+      <section>
+        <Article />
+      </section>
     </>
   );
 }

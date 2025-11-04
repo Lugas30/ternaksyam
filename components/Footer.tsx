@@ -1,84 +1,163 @@
+"use client";
+
 import Image from "next/image";
 import React from "react";
 import LogoTs from "../public/images/logo_ternaksyams.png";
 import LogoHalal from "../public/images/logo_halal.png";
 import LogoBpom from "../public/images/BPOM.png";
+import Splash from "../public/images/milksplash.png"; // Pastikan gambar ini adalah versi PNG/transparan
+import whatsapp from "@/public/images/wa.png";
+import ig from "@/public/images/ig.png";
+import fb from "@/public/images/fb.png";
+import yt from "@/public/images/yt.png";
+import tt from "@/public/images/tt.png";
 
 export default function Footer() {
   return (
     <>
       <footer
-        className="footer text-white"
-        style={{ background: "linear-gradient(to bottom, #19996B, #106144)" }}
+        className="text-white relative overflow-hidden" // Tambahkan relative dan overflow-hidden
+        style={{
+          background: "linear-gradient(to bottom, #19996B, #106144)",
+        }}
       >
-        <div className="grid grid-cols-4 w-full gap-4 px-20 pt-10">
-          <aside className="flex flex-col col-span-1 gap-5">
-            <Image src={LogoTs} alt="logo" width={200} height={200} />
-            <p>
+        {/* Latar Belakang Milk Splash di kanan bawah */}
+        <div
+          className="absolute right-0 -bottom-8 w-full h-full pointer-events-none"
+          style={{
+            backgroundImage: `url(${Splash.src})`,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "contain", // Sesuaikan agar terlihat seperti gambar
+            backgroundPosition: "right bottom",
+            maxWidth: "700px", // Sesuaikan agar splash tidak terlalu besar
+            opacity: 0.9, // Sedikit transparansi agar teks terlihat
+          }}
+        />
+
+        <div className="relative z-10 grid grid-cols-12 w-full gap-4 px-10 md:px-20 pt-10 pb-5">
+          {/* Kolom 1: Logo, Deskripsi, dan Logo Halal/BPOM (Col Span 4) */}
+          <aside className="flex flex-col col-span-12 md:col-span-4 gap-5">
+            <Image
+              src={LogoTs}
+              alt="TernakSyams Logo"
+              width={180}
+              height={30}
+              className="w-40 h-auto mb-2"
+            />
+
+            <p className="max-w-xs text-sm">
               Susu kambing Etawa bernutrisi tinggi dengan rasa lezat, rendah
               gula, dan tanpa aroma prengus.
             </p>
-            <div className="flex gap-2">
-              <div className="rounded-full w-20 h-20 bg-white shadow-md flex items-center justify-center">
-                <Image src={LogoHalal} alt="logo" width={80} height={80} />
+            <div className="flex gap-4">
+              {/* Halal Logo */}
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-full flex items-center justify-center">
+                <Image
+                  src={LogoHalal}
+                  alt="Halal Logo"
+                  width={50}
+                  height={50}
+                  className="w-auto h-auto p-3"
+                />
               </div>
-              <div className="rounded-full w-20 h-20 bg-white shadow-md flex items-center justify-center">
-                <Image src={LogoBpom} alt="logo" width={50} height={50} />
+              {/* BPOM Logo */}
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-full flex items-center justify-center">
+                <Image
+                  src={LogoBpom}
+                  alt="BPOM Logo"
+                  width={50}
+                  height={50}
+                  className="w-auto h-auto p-3"
+                />
               </div>
             </div>
           </aside>
-          <nav className="flex flex-col col-span-1 gap-2">
-            <h6 className="footer-title">INFORMASI</h6>
-            <a className="link link-hover">Branding</a>
-            <a className="link link-hover">Design</a>
-            <a className="link link-hover">Marketing</a>
-            <a className="link link-hover">Advertisement</a>
+
+          {/* Kolom 2: INFORMASI (Col Span 2) */}
+          <nav className="flex flex-col col-span-6 md:col-span-2 gap-2 mt-5 md:mt-0">
+            <h6 className="font-bold text-lg mb-2 tracking-wide">INFORMASI</h6>
+            <a className="link link-hover text-sm">Tentang kami</a>
+            <a className="link link-hover text-sm">Manfaat susu kambing</a>
+            <a className="link link-hover text-sm">Varian susu kambing</a>
+            <a className="link link-hover text-sm">Artikel</a>
+            <a className="link link-hover text-sm">Arsip</a>
           </nav>
-          <nav className="flex flex-col gap-2">
-            <h6 className="footer-title">SUSU KAMBING</h6>
-            <a className="link link-hover">About us</a>
-            <a className="link link-hover">Contact</a>
-            <a className="link link-hover">Jobs</a>
-            <a className="link link-hover">Press kit</a>
+
+          {/* Kolom 3: SUSU KAMBING (Col Span 2) */}
+          <nav className="flex flex-col col-span-6 md:col-span-2 gap-2 mt-5 md:mt-0">
+            <h6 className="font-bold text-lg mb-2 tracking-wide">
+              SUSU KAMBING
+            </h6>
+            <a className="link link-hover text-sm">Etawa Original</a>
+            <a className="link link-hover text-sm">Goat Fly</a>
+            <a className="link link-hover text-sm">Goata</a>
+            <a className="link link-hover text-sm">Goat Me Non Sugar</a>
           </nav>
-          <nav className="flex flex-row col-span-1 gap-2">
-            <a className="link link-hover rounded-full w-10 h-10 bg-primary shadow-md flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                className="fill-current"
+
+          {/* Kolom 4: KONSULTASI GRATIS & Media Sosial (Col Span 4) */}
+          <div className="flex flex-col col-span-12 md:col-span-4 gap-4 mt-5 md:mt-0">
+            {/* Box Konsultasi Gratis */}
+            <div
+              className="bg-primary p-4 rounded-xl shadow-2xl flex flex-col items-center justify-center"
+              style={{ backgroundColor: "#0C4C35", minWidth: "300px" }}
+            >
+              <div className="flex items-center gap-3 w-full">
+                {/* Ikon WhatsApp */}
+                <img
+                  src={whatsapp.src}
+                  alt="WhatsApp Icon"
+                  className="w-10 h-10 md:w-12 md:h-12"
+                />
+                <div className="flex flex-col">
+                  <span className="font-bold text-lg tracking-wide text-yellow-300">
+                    KONSULTASI GRATIS
+                  </span>
+                  <span className="text-2xl font-extrabold">
+                    0857-3232-1515
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Ikon Media Sosial */}
+            <div className="flex gap-3 justify-center md:justify-start">
+              {/* Facebook */}
+              <a
+                href="#"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-xl"
               >
-                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"></path>
-              </svg>
-            </a>
-            <a className="link link-hover rounded-full w-10 h-10 bg-primary shadow-md flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                className="fill-current"
+                <img src={fb.src} alt="Facebook Icon" />
+              </a>
+              {/* Instagram */}
+              <a
+                href="#"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-xl"
               >
-                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path>
-              </svg>
-            </a>
-            <a className="link link-hover rounded-full w-10 h-10 bg-primary shadow-md flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                className="fill-current"
+                <img src={ig.src} alt="Instagram Icon" />
+              </a>
+              {/* Youtube */}
+              <a
+                href="#"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-xl"
               >
-                <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"></path>
-              </svg>
-            </a>
-          </nav>
-          <div className="col-span-4 w-full py-5">
-            <div className="items-center border-t border-base-300 pt-5">
-              <p>Copyright © {new Date().getFullYear()} - All right reserved</p>
+                <img src={yt.src} alt="YouTube Icon" />
+              </a>
+              {/* TikTok */}
+              <a
+                href="#"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-xl"
+              >
+                <img src={tt.src} alt="TikTok Icon" />
+              </a>
+            </div>
+          </div>
+
+          {/* Baris Hak Cipta di bawah */}
+          <div className="col-span-12 w-full pt-5">
+            <div className="border-t border-white border-opacity-30 pt-4">
+              <p className="text-sm">
+                TernakSyams © Copyright {new Date().getFullYear()}
+              </p>
             </div>
           </div>
         </div>
