@@ -40,7 +40,7 @@ const ArticleGridCard: React.FC<{ article: Article }> = ({ article }) => (
       className="w-full h-48 object-cover"
     />
     <div className="p-4">
-      <span className="inline-block text-xs font-semibold py-1 px-2 rounded-sm text-white bg-green-800 uppercase mb-2">
+      <span className="inline-block text-xs font-semibold py-1 px-2 rounded-sm text-white bg-secondary uppercase mb-2">
         {article.category}
       </span>
 
@@ -48,7 +48,7 @@ const ArticleGridCard: React.FC<{ article: Article }> = ({ article }) => (
         {article.title}
       </h3>
       <button
-        className="text-sm font-semibold text-green-600 hover:text-green-700 transition-colors mt-2"
+        className="text-sm font-semibold text-secondary hover:text-primary transition-colors mt-2"
         onClick={() => console.log("Go to article:", article.slug)}
       >
         Selengkapnya
@@ -70,7 +70,7 @@ const ArticleHeroCard: React.FC<{ article: Article }> = ({ article }) => (
     </div>
 
     {/* Konten Kanan (Sesuai Desain: Background Hijau) */}
-    <div className="p-8 flex flex-col justify-between bg-green-700 text-white">
+    <div className="p-8 flex flex-col justify-between bg-neutral text-white">
       <div>
         <h2 className="text-xl md:text-2xl font-extrabold mb-3">
           {article.title}
@@ -82,7 +82,7 @@ const ArticleHeroCard: React.FC<{ article: Article }> = ({ article }) => (
 
       <div className="mt-6">
         <button
-          className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-6 rounded transition-colors mr-4"
+          className="bg-primary hover:bg-green-800 text-white font-bold py-2 px-6 rounded transition-colors mr-4"
           onClick={() => console.log("Go to article:", article.slug)}
         >
           Selengkapnya
@@ -90,10 +90,10 @@ const ArticleHeroCard: React.FC<{ article: Article }> = ({ article }) => (
 
         {/* Navigasi PREV/NEXT (dummy) */}
         <div className="inline-flex space-x-2">
-          <button className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 rounded transition-colors">
+          <button className="bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded transition-colors">
             PREV
           </button>
-          <button className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 rounded transition-colors">
+          <button className="bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded transition-colors">
             NEXT
           </button>
         </div>
@@ -103,7 +103,7 @@ const ArticleHeroCard: React.FC<{ article: Article }> = ({ article }) => (
 );
 
 // --- 4. Halaman Utama (articles) ---
-const articles: React.FC = () => {
+const ArticlesPage: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -146,9 +146,13 @@ const articles: React.FC = () => {
     fetchArticles();
   }, [API_URL]);
 
-  // Ambil artikel utama (pertama) dan sisanya untuk grid
+  // Ambil artikel utama (pertama)
   const heroArticle = articles.length > 0 ? articles[0] : null;
-  const articlesForGridSource = articles.slice(1); // Mulai dari artikel kedua
+
+  // ********** PERUBAHAN UTAMA DI SINI **********
+  // Menggunakan SEMUA artikel untuk grid, termasuk yang dijadikan Hero Card
+  const articlesForGridSource = articles;
+  // ********************************************
 
   // Logika Pagination
   const totalPages = Math.ceil(articlesForGridSource.length / itemsPerPage);
@@ -263,4 +267,4 @@ const articles: React.FC = () => {
   );
 };
 
-export default articles;
+export default ArticlesPage;

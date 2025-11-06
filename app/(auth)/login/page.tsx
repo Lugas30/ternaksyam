@@ -89,7 +89,7 @@ const Login = () => {
         <div className="w-full md:w-3/5 p-8 sm:p-12 order-2 md:order-1">
           <div className="max-w-md mx-auto">
             <h2 className="text-4xl font-extrabold text-gray-800 mb-2 flex items-center">
-              <LogIn className="w-8 h-8 mr-3 text-[#19996B]" /> Masuk Akun
+              <LogIn className="w-8 h-8 mr-3 text-primary" /> Masuk Akun
             </h2>
             <p className="text-sm text-gray-500 mb-8">
               Selamat datang kembali! Silakan masukkan kredensial Anda untuk
@@ -106,7 +106,7 @@ const Login = () => {
               {/* Input Email */}
               <div className="mb-5">
                 <label className="text-sm font-medium text-gray-700 mb-1 flex items-center">
-                  <Mail className="w-4 h-4 mr-2 text-[#23B97F]" /> Email
+                  <Mail className="w-4 h-4 mr-2 text-primary" /> Email
                 </label>
                 <input
                   type="email"
@@ -121,7 +121,7 @@ const Login = () => {
               {/* Input Password */}
               <div className="mb-6">
                 <label className="text-sm font-medium text-gray-700 mb-1 flex items-center">
-                  <Lock className="w-4 h-4 mr-2 text-[#23B97F]" /> Password
+                  <Lock className="w-4 h-4 mr-2 text-primary" /> Password
                 </label>
                 <input
                   type="password"
@@ -137,7 +137,7 @@ const Login = () => {
                 {/* Menggunakan Link component sesuai struktur asli Anda */}
                 <Link
                   href="/forgot-password"
-                  className="text-sm font-semibold text-[#19996B] hover:text-[#12714D] transition duration-150"
+                  className="text-sm font-semibold text-primary hover:text-[#12714D] transition duration-150"
                 >
                   Lupa password?
                 </Link>
@@ -145,7 +145,7 @@ const Login = () => {
 
               <button
                 type="submit"
-                className="w-full py-3 bg-[#19996B] text-white font-bold text-lg rounded-xl hover:bg-[#12714D] transition duration-300 shadow-md hover:shadow-lg disabled:opacity-60 flex items-center justify-center"
+                className="w-full py-3 bg-primary text-white font-bold text-lg rounded-xl hover:bg-[#12714D] transition duration-300 shadow-md hover:shadow-lg disabled:opacity-60 flex items-center justify-center"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -206,7 +206,7 @@ const Login = () => {
         </div>
 
         {/* Kolom Pendaftaran/Promosi (Kanan) */}
-        <div className="w-full md:w-2/5 bg-[#19996B] text-white p-8 sm:p-12 flex flex-col justify-center items-center text-center order-1 md:order-2">
+        <div className="w-full md:w-2/5 bg-primary text-white p-8 sm:p-12 flex flex-col justify-center items-center text-center order-1 md:order-2">
           <UserPlus className="w-12 h-12 mb-4" />
           <h3 className="text-3xl font-bold mb-3">Bergabunglah dengan Kami</h3>
           <p className="text-sm font-light mb-8 opacity-90">
@@ -216,7 +216,7 @@ const Login = () => {
           {/* Menggunakan Link component sesuai struktur asli Anda */}
           <Link
             href="/register"
-            className="w-full py-3 px-6 bg-white text-[#19996B] font-bold rounded-xl hover:bg-gray-100 transition duration-300 shadow-md hover:shadow-lg text-lg"
+            className="w-full py-3 px-6 bg-white text-primary font-bold rounded-xl hover:bg-gray-100 transition duration-300 shadow-md hover:shadow-lg text-lg"
           >
             Daftar Akun
           </Link>
