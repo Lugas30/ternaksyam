@@ -109,7 +109,7 @@ const ProductPage: React.FC = () => {
     isLast,
   }) => {
     // Link tujuan menggunakan slug
-    const productUrl = `/product/${product.slug}`;
+    const productUrl = `/varian/${product.slug}`;
     const mainImageUrl = `${API_IMAGE_URL}/${product.image}`;
 
     return (
