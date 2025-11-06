@@ -133,7 +133,7 @@ const daftarReseller: React.FC = () => {
     <main className="min-h-screen bg-base-100 text-base-content">
       <div className="mx-auto w-full max-w-sm md:max-w-md px-4 py-10">
         {/* Header ala affiliate */}
-        <h1 className="text-3xl font-extrabold text-center text-green-800">
+        <h1 className="text-3xl font-extrabold text-center text-primary">
           Daftar Reseller
         </h1>
         <p className="mt-2 text-center text-sm text-base-content/70">
@@ -282,7 +282,7 @@ const daftarReseller: React.FC = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="btn btn-success w-full mt-2"
+                className="btn btn-primary w-full mt-2"
               >
                 {submitting ? (
                   <span className="loading loading-spinner loading-sm" />

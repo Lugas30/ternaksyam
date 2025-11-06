@@ -1,4 +1,5 @@
 import goat from "@/public/images/goat.png";
+import Link from "next/link";
 
 export default function JoinAF() {
   return (
@@ -26,9 +27,11 @@ export default function JoinAF() {
             </p>
 
             <div className="mt-8">
-              <button className="inline-flex items-center justify-center rounded-full border border-white/90 px-6 py-3 text-white font-semibold hover:bg-white/10 transition">
-                Join Sekarang!
-              </button>
+              <Link href="/afiliator">
+                <button className="inline-flex items-center justify-center rounded-full border border-white/90 px-6 py-3 text-white font-semibold hover:bg-white/10 transition">
+                  Join Sekarang!
+                </button>
+              </Link>
             </div>
           </div>
         </div>

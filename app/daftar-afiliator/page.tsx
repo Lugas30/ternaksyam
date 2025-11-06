@@ -119,7 +119,7 @@ const DaftarAffiliate: React.FC = () => {
   return (
     <div className="min-h-screen bg-base-100">
       <div className="mx-auto w-full max-w-md py-10 px-4">
-        <h1 className="text-3xl font-extrabold text-center text-green-800">
+        <h1 className="text-3xl font-extrabold text-center text-primary">
           Daftar Afiliator
         </h1>
         <p className="text-center text-sm mt-2 text-base-content/70">
@@ -263,7 +263,7 @@ const DaftarAffiliate: React.FC = () => {
 
               <button
                 type="submit"
-                className="btn btn-success w-full mt-2"
+                className="btn btn-primary w-full mt-2"
                 disabled={loading}
               >
                 {loading ? (

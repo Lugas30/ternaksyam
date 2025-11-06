@@ -6,7 +6,12 @@ import Image from "next/image";
 import LogoTs from "../public/images/logo_ternaksyams.png";
 import DrawerCart from "./DrawerCart"; // Import DrawerCart yang sudah diupdate
 import { useRouter } from "next/navigation";
-import { CircleX, ShoppingBag, CircleUserRound } from "lucide-react";
+import {
+  CircleX,
+  ShoppingBag,
+  CircleUserRound,
+  ShoppingCart,
+} from "lucide-react";
 
 // Redux hooks & state
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
@@ -183,11 +188,11 @@ export default function Navbar() {
           {/* END */}
           <div className="navbar-end gap-2">
             {/* Tombol Belanja Sekarang */}
-            <Link
-              href="/shop"
-              className="btn btn-primary hover:bg-secondary border-none px-8 py-6 font-bold rounded-full"
-            >
-              Belanja Sekarang
+            <Link href="/shop" className="hidden lg:block">
+              <button className="btn btn-primary hover:bg-secondary border-none px-8 py-6 font-bold rounded-full">
+                <ShoppingCart />
+                Belanja
+              </button>
             </Link>
 
             {/* Tombol akun: behavior kondisional */}
