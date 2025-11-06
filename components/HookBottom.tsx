@@ -11,11 +11,17 @@ export default function HookTop() {
           "url(https://images.unsplash.com/photo-1731770207534-4411fd273c9e?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)",
       }}
     >
-      {/* <div className="hero-overlay"></div> */}
-      <div className="text-center relative w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 items-center">
+      <div className="text-center relative w-full px-4 md:px-0">
+        {/* Kontainer Flex untuk Mobile, Grid untuk Desktop */}
+        <div className="flex flex-col md:grid md:grid-cols-2 items-center gap-6 md:gap-0">
+          {/* Card Kiri: Card Manfaat Kesehatan (Posisi Atas di Mobile) */}
           <div
-            className="absolute left-1/6 z-1 isolate overflow-hidden bg-neutral max-w-[500px] w-full p-6 sm:p-8 md:p-10 rounded-tr-3xl rounded-bl-3xl"
+            className="
+              relative z-10 isolate overflow-hidden bg-neutral 
+              max-w-full md:max-w-[500px] w-full p-6 sm:p-8 md:p-10 
+              rounded-xl md:rounded-tr-3xl md:rounded-bl-3xl
+              md:absolute md:left-1/6
+            "
             aria-label="Card manfaat kesehatan"
           >
             {/* Konten */}
@@ -35,12 +41,12 @@ export default function HookTop() {
               type="button"
               className="
               mt-8 inline-flex items-center justify-center rounded-full border border-white/90 px-6 py-3 text-white font-semibold hover:bg-white/10 transition
-            "
+              "
             >
               <span>Lihat Manfaat</span>
               <svg
                 viewBox="0 0 24 24"
-                className="size-4 md:size-5"
+                className="size-4 md:size-5 ml-2" /* Tambahkan ml-2 untuk jarak */
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -64,12 +70,19 @@ export default function HookTop() {
             />
           </div>
 
-          {/* Card kanan: image + quote + badge */}
-          <div className="absolute right-0 overflow-hidden max-w-1/2 w-full h-[460px] sm:h-[500px] md:h-[600px] rounded-tl-3xl rounded-bl-3xl shadow-sm">
+          {/* Card Kanan: image + quote + badge (Posisi Bawah di Mobile) */}
+          <div
+            className="
+              relative overflow-hidden 
+              w-full md:max-w-1/2 
+              h-[400px] sm:h-[460px] md:h-[600px] 
+              rounded-xl md:rounded-tl-3xl md:rounded-bl-3xl shadow-lg
+              md:absolute md:right-0
+            "
+          >
             {/* Gambar utama */}
             <img
               src={ustd.src}
-              // src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=1200&auto=format&fit=crop"
               alt="Testimoni minum produk"
               className="absolute inset-0 w-full h-full object-cover"
             />
@@ -78,7 +91,8 @@ export default function HookTop() {
             <div className="absolute inset-0 bg-linear-to-b via-transparent to-white/0" />
 
             {/* Kutipan di pojok kanan-atas */}
-            <p className="absolute top-4 right-4 max-w-[70%] text-right text-primary text-xssm:text-sm md:text-base leading-snug ">
+            <p className="absolute top-4 right-4 max-w-[70%] text-right text-white sm:text-primary text-xs sm:text-sm md:text-base leading-snug font-semibold drop-shadow-md">
+              {/* Ubah warna teks menjadi putih untuk mobile agar lebih terbaca di atas gambar */}
               “Sejak kecil mengidap asma, dan selalu kambuh, tapi kini sembuh
               berkat Ternak Syams.”
             </p>

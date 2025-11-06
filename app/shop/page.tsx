@@ -19,6 +19,9 @@ const ProductList = () => {
   const [selectedCategoryName, setSelectedCategoryName] =
     useState<string>("All Product"); // Menggunakan string "All Product" sebagai nilai default
 
+  // ✨ STATE BARU UNTUK PENCARIAN PRODUK
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
   // Konfigurasi API
   const imageUrl = process.env.NEXT_PUBLIC_API_IMAGE_URL;
 
@@ -30,22 +33,39 @@ const ProductList = () => {
     }
   }, [status, dispatch]);
 
-  // Event Handler untuk Mengubah Filter
+  // Event Handler untuk Mengubah Filter Kategori (Tombol Desktop)
   const handleCategoryFilter = (categoryName: string) => {
     setSelectedCategoryName(categoryName);
+    // Opsional: reset pencarian saat kategori berubah
+    // setSearchQuery("");
   };
 
-  // Event Handler untuk Dropdown Select
+  // Event Handler untuk Dropdown Select (Mobile)
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCategoryName(e.target.value);
+    // Opsional: reset pencarian saat kategori berubah
+    // setSearchQuery("");
+  };
+
+  // ✨ EVENT HANDLER UNTUK INPUT PENCARIAN
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
 
   // Logika untuk Memfilter Produk
   const filteredProducts = products.filter((product: any) => {
-    if (selectedCategoryName === "All Product") {
-      return true; // Tampilkan semua produk
-    }
-    return product.category === selectedCategoryName;
+    // 1. Filter Kategori
+    const categoryMatch =
+      selectedCategoryName === "All Product" ||
+      product.category === selectedCategoryName;
+
+    // 2. Filter Pencarian (Case-insensitive)
+    const searchMatch = product.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    // Produk harus lolos kedua filter
+    return categoryMatch && searchMatch;
   });
 
   // Menampilkan loading jika statusnya loading
@@ -84,32 +104,42 @@ const ProductList = () => {
   // Menampilkan produk setelah statusnya succeeded
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-4">
+      <h2 className="text-2xl md:text-3xl font-bold text-primary my-4">
         Etawa Goat Milk
       </h2>
 
-      {/* Product Filter Area */}
+      {/* Product Filter and Search Area */}
       <div
         className="font-bold my-4 py-3 px-2 sm:px-4 md:px-6 rounded-lg"
         style={{ backgroundColor: "#f9f5ed", border: "1px solid #f9f5ed" }}
       >
         {/*
           =====================================
+          0. Search Input Field
+          =====================================
+        */}
+        <div className="mb-4">
+          <input
+            type="text"
+            id="product-search"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Cari produk"
+            className="w-full p-2 border border-gray-300 bg-white rounded-md text-sm  font-normal"
+          />
+        </div>
+
+        {/*
+          =====================================
           1. Dropdown Filter (Tampilan Mobile)
           =====================================
         */}
         <div className="md:hidden">
-          <label
-            htmlFor="category-select"
-            className="text-sm text-gray-700 block mb-1"
-          >
-            Filter Kategori:
-          </label>
           <select
             id="category-select"
             value={selectedCategoryName}
             onChange={handleDropdownChange}
-            className="w-full p-2 border border-gray-300 rounded-md text-sm shadow-sm focus:border-[#14433c] focus:ring focus:ring-[#14433c]/50"
+            className="w-full p-2 border border-gray-300 rounded-md text-sm shadow-sm focus:border-[#14433c] focus:ring focus:ring-[#14433c]/50 font-normal"
           >
             <option value="All Product">Semua Produk</option>
             {categories.map((category: any) => (
@@ -119,7 +149,6 @@ const ProductList = () => {
             ))}
           </select>
         </div>
-
         {/*
           =====================================
           2. Tombol Filter (Tampilan Desktop)
@@ -201,8 +230,17 @@ const ProductList = () => {
           ))
         ) : (
           <div className="col-span-full text-center py-10 text-gray-600 text-base sm:text-lg">
+            {/* Pesan No Product disesuaikan */}
             Tidak ada produk yang tersedia untuk kategori{" "}
-            <span className="font-bold">{selectedCategoryName}</span>.
+            <span className="font-bold">{selectedCategoryName}</span>
+            {searchQuery && (
+              <>
+                {" "}
+                dengan kata kunci "
+                <span className="font-bold">{searchQuery}</span>"
+              </>
+            )}
+            .
           </div>
         )}
       </div>
