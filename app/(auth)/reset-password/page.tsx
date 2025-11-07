@@ -56,7 +56,12 @@ const ResetPassword = () => {
       // Ganti logika ini dengan API untuk reset password
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/reset-password`,
-        { token, password } // Kirim token dan password baru ke backend
+        // **DATA YANG SUDAH DISESUAIKAN UNTUK API**
+        {
+          token,
+          password,
+          password_confirmation: confirmPassword, // Tambahkan field konfirmasi
+        }
       );
 
       setIsLoading(false);
