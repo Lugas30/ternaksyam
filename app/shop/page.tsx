@@ -90,7 +90,10 @@ const ProductList = () => {
   // Fungsi untuk Menentukan Kelas Tombol (Styling) - Hanya untuk Desktop
   const getButtonClasses = (name: string) => {
     const isActive = selectedCategoryName === name;
-    const activeClasses = "bg-primary-dark text-white shadow-md"; // Hijau gelap
+
+    // ✅ PERBAIKAN: Menggunakan warna primary yang seragam untuk semua tombol aktif
+    const activeClasses = "bg-[#14433c] text-white shadow-md"; // Hijau gelap (primary)
+
     const inactiveClasses =
       "border-2 shadow-sm bg-white border-[#14433c] text-[#14433c] hover:bg-stone-50"; // Putih dengan border hijau gelap
 
@@ -159,12 +162,7 @@ const ProductList = () => {
           {/* Tombol 'All Product' */}
           <button
             onClick={() => handleCategoryFilter("All Product")} // Menggunakan string "All Product"
-            className={getButtonClasses("All Product")} // Menggunakan fungsi kelas
-            style={
-              selectedCategoryName === "All Product"
-                ? { backgroundColor: "#14433c" } // Warna background khusus jika aktif
-                : {}
-            }
+            className={getButtonClasses("All Product")} // Menggunakan fungsi kelas, tidak perlu inline style lagi
           >
             Semua Produk
           </button>

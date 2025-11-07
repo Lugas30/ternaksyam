@@ -151,7 +151,18 @@ const ProductDetail = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-50">
+        <div className="text-center">
+          <p className="text-xl text-green-700 font-semibold">
+            Memuat produk...
+          </p>
+          <div className="mt-4 w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
   if (error) return <div>{error}</div>;
 
   // Untuk tampilan harga di UI
@@ -176,23 +187,23 @@ const ProductDetail = () => {
 
         {/* Detail Produk */}
         <div>
-          <h1 className="text-2xl font-bold text-primary">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary">
             {filteredVariants[0]?.name}
           </h1>
 
-          <div className="mt-1">
+          <div className="mt-2 md:mt-3 text-lg md:text-xl">
             {hasDiscount && (
               <span className="line-through text-gray-400 pr-2">
                 Rp. {Number(currentSize?.price ?? 0).toLocaleString()}
               </span>
             )}
-            <span className="text-gray-600 font-medium">
+            <span className="text-gray-600 font-medium text-2xl">
               Rp. {Number(displayUnitPrice).toLocaleString()}
             </span>
           </div>
 
           {/* Pilihan Rasa */}
-          <div className="mt-4">
+          <div className="my-4 md:my-6 border-t border-b border-gray-300 py-6">
             <div className="flex flex-col">
               <div className="flex justify-between space-x-2 mb-5">
                 <label className="font-bold">Rasa:</label>
@@ -242,7 +253,7 @@ const ProductDetail = () => {
                         htmlFor={`size-${size.id}`}
                         className="cursor-pointer px-4 py-2 text-gray-500 rounded-md border-2 border-primary peer-checked:bg-primary peer-checked:text-white hover:bg-zinc-300 transition duration-200"
                       >
-                        {size.size}
+                        {size.size} gr
                       </label>
                     </div>
                   ))}
@@ -252,7 +263,7 @@ const ProductDetail = () => {
           </div>
 
           {/* Button */}
-          <div className="mt-6">
+          <div className="py-4">
             <button
               onClick={handleAddToCart}
               className="cursor-pointer bg-primary text-white p-4 rounded-md w-full"
@@ -263,22 +274,26 @@ const ProductDetail = () => {
 
           {/* Informasi Gizi */}
           <div className="mt-6">
-            <h2 className="text-lg font-semibold">Informasi Nilai Gizi</h2>
+            <h2 className="text-lg font-semibold mb-6">Informasi Nilai Gizi</h2>
             <img
               src={`${imageUrl}/${productDetail.gizi_path}`}
               alt="Informasi Gizi"
-              className="w-full h-auto rounded-lg shadow-lg"
+              className="w-md h-auto rounded-lg shadow-lg"
             />
           </div>
         </div>
       </div>
 
       {/* Deskripsi & Manfaat */}
-      <div className="mt-6">
-        <h2 className="text-lg font-semibold">Deskripsi</h2>
+      <div className="py-6">
+        <h2 className="text-lg font-semibold my-4 border-b border-gray-300 leading-loose">
+          Deskripsi
+        </h2>
         <div dangerouslySetInnerHTML={{ __html: productDetail.description }} />
 
-        <h2 className="text-lg font-semibold mt-4">Manfaat</h2>
+        <h2 className="text-lg font-semibold my-4 border-b border-gray-300 leading-loose">
+          Manfaat
+        </h2>
         <div dangerouslySetInnerHTML={{ __html: productDetail.benefits }} />
       </div>
 

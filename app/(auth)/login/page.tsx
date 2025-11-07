@@ -12,7 +12,6 @@ import axios from "axios";
 
 // Dependensi UI (dipertahankan dari desain terbaru)
 import { LogIn, UserPlus, Mail, Lock, Loader2 } from "lucide-react";
-import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");

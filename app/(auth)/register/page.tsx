@@ -12,6 +12,7 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
+  LogInIcon,
 } from "lucide-react";
 
 const Register = () => {
@@ -241,7 +242,7 @@ const Register = () => {
 
         {/* Kolom Info/Promosi (Kanan) */}
         <div className="w-full md:w-2/5 bg-primary text-white p-8 sm:p-12 flex flex-col justify-center items-center text-center order-1 md:order-2">
-          <UserPlus className="w-12 h-12 mb-4" />
+          <LogInIcon className="w-12 h-12 mb-4" />
           <h3 className="text-3xl font-bold mb-3">Selamat Datang!</h3>
           <p className="text-sm font-light mb-8 opacity-90">
             Masuk untuk menikmati pengalaman personal dan mengakses semua
