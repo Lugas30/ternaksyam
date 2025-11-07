@@ -180,22 +180,6 @@ const ResetPassword = () => {
                 )}
               </button>
             </form>
-
-            {/* Bagian Kembali ke Login */}
-            <div className="relative flex items-center my-8">
-              <div className="grow border-t border-gray-300"></div>
-              <span className="shrink mx-4 text-gray-500 text-xs font-semibold uppercase">
-                ATAU
-              </span>
-              <div className="grow border-t border-gray-300"></div>
-            </div>
-
-            <Link
-              href="/login"
-              className="w-full py-3 bg-white text-primary font-semibold rounded-xl border border-gray-300 hover:bg-gray-50 transition duration-150 flex items-center justify-center space-x-3 shadow-sm hover:shadow-md text-base"
-            >
-              Kembali ke Halaman Masuk
-            </Link>
           </div>
         </div>
 
@@ -207,12 +191,6 @@ const ResetPassword = () => {
             Jaga keamanan akun Anda dengan menggunakan password yang kuat,
             kombinasi huruf besar, kecil, angka, dan simbol.
           </p>
-          <Link
-            href="/register"
-            className="w-full py-3 px-6 bg-white text-primary font-bold rounded-xl hover:bg-gray-100 transition duration-300 shadow-md hover:shadow-lg text-lg"
-          >
-            Daftar Akun Baru
-          </Link>
         </div>
       </div>
     </div>
