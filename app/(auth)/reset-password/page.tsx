@@ -114,11 +114,10 @@ const ResetPassword = () => {
           <div className="max-w-md mx-auto">
             <h2 className="text-4xl font-extrabold text-gray-800 mb-2 flex items-center">
               {/* Ikon untuk Reset Password */}
-              <Key className="w-8 h-8 mr-3 text-primary" /> Atur Ulang Password
+              Atur Ulang Password
             </h2>
             <p className="text-sm text-gray-500 mb-8">
-              Masukkan **password baru** Anda. Pastikan password Anda kuat dan
-              unik.
+              Masukkan password baru Anda. Pastikan password Anda kuat dan unik.
             </p>
 
             <form onSubmit={handleSubmit}>
