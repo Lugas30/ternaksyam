@@ -102,14 +102,19 @@ const Slider: React.FC = () => {
       setLoading(true);
       const response = await axios.get<SliderData[]>(`${BASE_API_URL}/sliders`);
       if (Array.isArray(response.data)) {
+        // Hanya ambil data jika merupakan array
         setSlides(response.data);
       } else {
-        throw new Error("Format data API tidak valid.");
+        // Jika API mengembalikan 200 OK tetapi data bukan array/format yang diharapkan
+        console.warn("API returned invalid data format.");
+        setSlides([]); // Set slides ke array kosong
       }
       setError(null);
     } catch (err) {
       console.error("Error fetching sliders:", err);
+      // Tetapkan error, tetapi juga pastikan slides kosong
       setError("Gagal memuat data slider. Silakan coba lagi.");
+      setSlides([]);
     } finally {
       setLoading(false);
     }
@@ -119,7 +124,7 @@ const Slider: React.FC = () => {
     fetchSliders();
   }, [fetchSliders]);
 
-  // --- Penanganan State Tampilan ---
+  // --- Penanganan State Tampilan (Diperbarui) ---
 
   if (loading)
     return (
@@ -133,12 +138,11 @@ const Slider: React.FC = () => {
         {error}
       </div>
     );
-  if (slides.length === 0)
-    return (
-      <div className="text-center py-8 text-gray-500">
-        ℹ️ Tidak ada slider yang tersedia saat ini.
-      </div>
-    );
+
+  // LOGIKA UTAMA: Jika data kosong, **return null (jangan tampilkan apapun)**
+  if (slides.length === 0) {
+    return null;
+  }
 
   // Render Utama
   return (
@@ -157,10 +161,6 @@ const Slider: React.FC = () => {
                 className="block w-full h-full group"
                 aria-label={slide.ctatext}
               >
-                {/* 1. Mobile: Ketinggian 100vh (sepenuh layar)
-                  2. Desktop (md ke atas): Ketinggian tetap 60vh (atau nilai tetap lain) untuk menjaga agar konten tidak terlalu besar.
-                  Anda bisa menyesuaikan 'h-screen' dan 'md:h-[60vh]' sesuai kebutuhan desain Anda.
-                */}
                 <div
                   className={
                     "relative w-full h-screen " + // Menyesuaikan ketinggian
@@ -209,6 +209,7 @@ const Slider: React.FC = () => {
         </div>
       </div>
 
+      {/* Tampilkan DotButtons hanya jika ada data */}
       {emblaApi && slides.length > 0 && <DotButtons emblaApi={emblaApi} />}
     </div>
   );

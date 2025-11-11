@@ -177,7 +177,7 @@ export default function Navbar() {
                 </li>
               ))}
               <li className="text-accent">
-                <Link href="#" onClick={closeSidebar}>
+                <Link href="/flash-sale" onClick={closeSidebar}>
                   Flash Sale
                 </Link>{" "}
                 {/* Asumsi Flash Sale belum punya halaman, pakai '#' */}
@@ -312,7 +312,7 @@ export default function Navbar() {
               </li>
             ))}
             <li className="text-accent">
-              <Link href="#" onClick={closeSidebar}>
+              <Link href="/flash-sale" onClick={closeSidebar}>
                 Flash Sale
               </Link>
             </li>
