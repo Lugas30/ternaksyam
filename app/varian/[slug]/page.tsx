@@ -407,7 +407,7 @@ const BrandProfile: React.FC = () => {
           minHeight: "80vh",
         }}
       >
-        <div className="absolute inset-0 bg-white/30 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-white/30"></div>
         <div className="relative max-w-4xl mx-auto text-center py-16">
           <h1 className="text-4xl md:text-5xl text-gray-900 mb-4">
             {currentData.hero.title}
@@ -482,6 +482,46 @@ const BrandProfile: React.FC = () => {
         </Marquee>
       </section>
 
+      <section className="my-10 text-2xl">Tambah slider disini</section>
+
+      {/* 6. More About Us Section (Data dinamis dari API) */}
+      <section
+        className={`py-20 ${sectionPaddingClass} bg-gray-50 border-t border-gray-100`}
+      >
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between">
+          {/* Kiri: Gambar Produk Berjejer */}
+          <div className="lg:w-1/2 mb-10 lg:mb-0 lg:pr-10 flex justify-center">
+            <img
+              src={currentData.aboutSection.imageURL}
+              alt={`Image for ${currentData.hero.title}`}
+              className="w-full max-w-lg rounded-lg shadow-xl object-cover h-auto"
+            />
+          </div>
+
+          {/* Kanan: Teks dan CTA */}
+          <div className="lg:w-1/2 lg:pl-10">
+            <h2
+              className="text-3xl md:text-4xl font-semibold mb-6"
+              style={{
+                color: currentData.accentTextColor || "#0a0a0a",
+              }}
+            >
+              {currentData.aboutSection.title}
+            </h2>
+            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+              {currentData.aboutSection.description}
+            </p>
+            <Link
+              href={currentData.aboutSection.ctaURL}
+              className="flex items-center px-6 py-3 border border-gray-900 text-sm font-medium rounded-full shadow-sm text-gray-900 bg-white hover:bg-gray-100 transition duration-300"
+            >
+              {currentData.aboutSection.ctaText}
+              <span className="ml-2">→</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* 5. Product Slider Section (Data dinamis dari API) */}
       <section className="py-16 bg-white">
         <div className={`max-w-7xl mx-auto ${sectionPaddingClass}`}>
@@ -519,44 +559,6 @@ const BrandProfile: React.FC = () => {
                 ))}
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. More About Us Section (Data dinamis dari API) */}
-      <section
-        className={`py-20 ${sectionPaddingClass} bg-gray-50 border-t border-gray-100`}
-      >
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between">
-          {/* Kiri: Gambar Produk Berjejer */}
-          <div className="lg:w-1/2 mb-10 lg:mb-0 lg:pr-10 flex justify-center">
-            <img
-              src={currentData.aboutSection.imageURL}
-              alt={`Image for ${currentData.hero.title}`}
-              className="w-full max-w-lg rounded-lg shadow-xl object-cover h-auto"
-            />
-          </div>
-
-          {/* Kanan: Teks dan CTA */}
-          <div className="lg:w-1/2 lg:pl-10">
-            <h2
-              className="text-3xl md:text-4xl font-semibold mb-6"
-              style={{
-                color: currentData.accentTextColor || "#0a0a0a",
-              }}
-            >
-              {currentData.aboutSection.title}
-            </h2>
-            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              {currentData.aboutSection.description}
-            </p>
-            <Link
-              href={currentData.aboutSection.ctaURL}
-              className="flex items-center px-6 py-3 border border-gray-900 text-sm font-medium rounded-full shadow-sm text-gray-900 bg-white hover:bg-gray-100 transition duration-300"
-            >
-              {currentData.aboutSection.ctaText}
-              <span className="ml-2">→</span>
-            </Link>
           </div>
         </div>
       </section>
@@ -640,6 +642,11 @@ const BrandProfile: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <section className="my-10 text-2xl">Tambah Testimoni</section>
+      <Link href="/shop">
+        <button className="btn btn-primary mb-20">Beli Sekarang</button>
+      </Link>
     </div>
   );
 };

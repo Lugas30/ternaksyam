@@ -106,7 +106,7 @@ const Cart = () => {
                     HARGA
                   </th>
                   <th className="px-6 py-3 text-sm font-medium text-gray-900">
-                    KUANTITI
+                    JUMLAH
                   </th>
                   <th className="px-6 py-3 text-sm font-medium text-gray-900">
                     TOTAL
