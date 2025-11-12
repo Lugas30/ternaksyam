@@ -7,6 +7,8 @@ import Marquee from "react-fast-marquee";
 import axios from "axios";
 import { useParams } from "next/navigation"; // Asumsi Next.js 13+ App Router
 
+import TestimonialBrand from "@/components/TestimonialBrand";
+
 // --- Konfigurasi API (Asumsi Environment Variable) ---
 // Harap pastikan variabel ini diatur di file .env.local Anda
 const API_URL =
@@ -392,7 +394,7 @@ const BrandProfile: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen bg-white">
       <style>{`
         .embla { overflow: hidden; }
         .embla__container { display: flex; }
@@ -453,12 +455,13 @@ const BrandProfile: React.FC = () => {
               {currentData.reviews.text}
             </p>
             <FiveStars />
-            <Link
-              href={currentData.reviews.linkURL}
-              className="text-sm underline mt-3 inline-block hover:text-blue-200 transition duration-300"
+            <a
+              href="#testimoni" // Ganti linkURL dengan ID section tujuan
+              // onClick={(e) => { e.preventDefault(); document.getElementById('testimoni')?.scrollIntoView({ behavior: 'smooth' }); }} // Opsional jika Anda ingin mengontrol scroll
+              className="text-sm underline mt-3 inline-block hover:text-blue-200 transition duration-300 cursor-pointer"
             >
               {currentData.reviews.linkText}
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -643,10 +646,30 @@ const BrandProfile: React.FC = () => {
         </div>
       </section>
 
-      <section className="my-10 text-2xl">Tambah Testimoni</section>
-      <Link href="/shop">
-        <button className="btn btn-primary mb-20">Beli Sekarang</button>
-      </Link>
+      <section className="" id="testimoni">
+        <TestimonialBrand />
+      </section>
+
+      <section className="flex items-center justify-center py-20 bg-white">
+        <Link href="/shop">
+          <button
+            className="
+        px-20 py-4 rounded-full        
+        text-xl          
+        border-2 border-neutral
+        text-neutral           
+        bg-transparent             
+        font-bold       
+        transition duration-300
+        hover:bg-neutral 
+        hover:text-white  
+        hover:shadow-lg       
+      "
+          >
+            Beli Sekarang
+          </button>
+        </Link>
+      </section>
     </div>
   );
 };

@@ -49,58 +49,6 @@ const testimonials = [
   },
 ];
 
-// --- Komponen Modal Video ---
-interface VideoModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  videoId: string;
-}
-
-const VideoModal: React.FC<VideoModalProps> = ({
-  isOpen,
-  onClose,
-  videoId,
-}) => {
-  if (!isOpen) return null;
-
-  // URL embed YouTube
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-
-  return (
-    // Backdrop gelap (Overlay)
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 transition-opacity duration-300"
-      onClick={onClose}
-    >
-      {/* Container Modal */}
-      <div
-        className="relative w-full max-w-4xl rounded-lg shadow-2xl transition-transform duration-300 scale-100"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Tombol Tutup */}
-        <button
-          className="absolute -top-3 -right-3 sm:-right-4 text-white bg-[#1E8A6E] rounded-full text-3xl font-bold px-3 py-1 leading-none hover:bg-opacity-80 transition-colors z-50"
-          onClick={onClose}
-          aria-label="Tutup modal"
-        >
-          &times;
-        </button>
-
-        {/* Video Player (Iframe) */}
-        {/* Tailwind untuk rasio aspek 16:9: pt-[56.25%] */}
-        <div className="relative pt-[56.25%] bg-black rounded-xl overflow-hidden">
-          <iframe
-            className="absolute top-0 left-0 w-full h-full"
-            src={embedUrl}
-            title="YouTube video player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        </div>
-      </div>
-    </div>
-  );
-};
 // ------------------------------------------------------------------
 
 // --- Komponen Tombol Navigasi Carousel ---
@@ -238,7 +186,7 @@ export default function TestimonialSection() {
 
   return (
     <section className="w-full bg-neutral bg-linear-to-b from-neutral to-[#187863]">
-      <div className="mx-auto max-w-[1200px] px-6 md:px-10 pb-48 pt-12">
+      <div className="mx-auto max-w-[1200px] px-6 md:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[520px] items-center gap-12">
           {/* Kolom kiri: Info Testimonial */}
           <div className="pr-0 lg:pr-8 order-2 lg:order-1">
@@ -256,28 +204,6 @@ export default function TestimonialSection() {
               Jangan hanya percaya kami, lihat perjuangan dan kesuksesan mereka
               meraih kesehatan yang diimpikan.
             </p>
-
-            {/* Tombol play + label */}
-            <div className="mt-8 flex items-center gap-4">
-              <button
-                aria-label="Tonton video testimoni"
-                onClick={openModal}
-                className="relative inline-flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/90 transition-all hover:scale-110 active:scale-95 bg-white/10"
-              >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="translate-x-px"
-                >
-                  <path d="M8 5l12 7-12 7V5z" fill="white" />
-                </svg>
-              </button>
-              <span className="text-white font-medium">
-                Tonton video testimoni
-              </span>
-            </div>
           </div>
 
           {/* Kolom kanan: Embla Carousel (Testimoni) */}
@@ -303,13 +229,6 @@ export default function TestimonialSection() {
           </div>
         </div>
       </div>
-
-      {/* Render Komponen Modal Video */}
-      <VideoModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        videoId={YOUTUBE_VIDEO_ID}
-      />
     </section>
   );
 }

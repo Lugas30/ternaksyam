@@ -47,8 +47,6 @@ interface Brand {
   variants: BrandVariant[]; // Array varian rasa/tipe
 }
 
-// Hapus fungsi createSlug dan data dummy
-
 // -------------------------------------------
 // 4. KOMPONEN UTAMA (ProductPage)
 // -------------------------------------------
@@ -104,19 +102,30 @@ const ProductPage: React.FC = () => {
   /**
    * Sub-Komponen untuk setiap Blok Produk
    */
-  const ProductBlock: React.FC<{ product: Brand; isLast: boolean }> = ({
-    product,
-    isLast,
-  }) => {
+  const ProductBlock: React.FC<{
+    product: Brand;
+    isLast: boolean;
+    index: number;
+  }> = ({ product, isLast, index }) => {
+    // Tentukan apakah ini blok genap (0, 2, 4, ...) atau ganjil (1, 3, 5, ...)
+    const isOdd = index % 2 !== 0;
+
+    // Gunakan 'md:flex-row-reverse' hanya untuk indeks Ganjil (untuk menukar posisi di desktop)
+    // Di mobile (tanpa prefix 'md:'), default 'flex-col' akan tetap berlaku (image di atas, deskripsi di bawah)
+    const layoutClass = isOdd ? "md:flex-row-reverse" : "";
+
     // Link tujuan menggunakan slug
-    const productUrl = `/varian/${product.slug}`;
+    const productUrl = `/brand-kami/${product.slug}`;
     const mainImageUrl = `${API_IMAGE_URL}/${product.image}`;
 
     return (
       <div className="py-8 md:py-10">
         {/* 1. Detail Utama Produk */}
-        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
-          {/* Gambar Utama */}
+        {/* Tambahkan layoutClass di sini untuk mengontrol urutan di layar desktop/large */}
+        <div
+          className={`flex flex-col md:flex-row gap-6 md:gap-8 items-start ${layoutClass}`}
+        >
+          {/* Gambar Utama (w-1/3 di desktop) */}
           <div className="w-full md:w-1/3 flex justify-center md:justify-start">
             {/* Mengatur agar gambar lebih kecil di mobile */}
             <div className="w-4/5 sm:w-2/3 md:w-full h-auto ">
@@ -128,7 +137,7 @@ const ProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Deskripsi & Ukuran */}
+          {/* Deskripsi & Ukuran (w-2/3 di desktop) */}
           <div className="w-full md:w-2/3">
             {/* **Penyesuaian Font Size:** text-2xl/3xl pada mobile, text-4xl pada desktop */}
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-3 md:mb-4 leading-tight">
@@ -228,6 +237,7 @@ const ProductPage: React.FC = () => {
                 key={product.id}
                 product={product}
                 isLast={index === products.length - 1} // Cek produk terakhir untuk divider
+                index={index} // Tambahkan index untuk logika tata letak
               />
             ))}
 

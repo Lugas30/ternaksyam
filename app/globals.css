@@ -18,6 +18,10 @@ button {
   font-family: var(--font-manrope), sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --color-base-100: oklch(98% 0.001 106.423);
   --color-base-200: oklch(97% 0.001 106.424);

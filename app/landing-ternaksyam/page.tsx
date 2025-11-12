@@ -145,6 +145,15 @@ const MobileLandingPage: React.FC = () => {
           [Area untuk carousel/list Testimonial]
         </div>
       </section>
+      <section className="h-16">
+        <iframe
+          src="https://www.tiktok.com/@goatlyfofficial/video/7569964322303020306"
+          className="w-full h-full border-none"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          title="Embedded YouTube Video"
+        ></iframe>
+      </section>
     </div>
   );
 };

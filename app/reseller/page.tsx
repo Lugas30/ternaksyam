@@ -156,30 +156,30 @@ const Reseller = () => {
         <div className="grid grid-cols-3 gap-4">
           <div>
             <img
-              src="https://placehold.co/300x500"
+              src="https://placehold.co/500x500"
               alt="Paket Etawa"
               className="w-full"
             ></img>
           </div>
           <div>
             <img
-              src="https://placehold.co/300x500"
+              src="https://placehold.co/500x500"
               alt="Paket Etawa"
               className="w-full"
             ></img>
           </div>
           <div>
             <img
-              src="https://placehold.co/300x500"
+              src="https://placehold.co/500x500"
               alt="Paket Etawa"
               className="w-full"
             ></img>
           </div>
         </div>
-        <p className="text-sm text-center my-5">
+        {/* <p className="text-sm text-center my-5">
           Note : untuk pengiriman saat ini ke alamat reseller, total pembelian
           belum termasuk BEBAN ONGKIR
-        </p>
+        </p> */}
       </section>
 
       {/* 4. SECTION TESTIMONIALS */}

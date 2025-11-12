@@ -215,7 +215,10 @@ const Afiliator = () => {
               Cukup share link affiliate, buat konten keranjang kuning, dan live
               streaming kapanpun dimanapun
             </p>
-            <Link href="/arsip" className=" font-bold text-2xl text-green-500">
+            <Link
+              href="/arsip"
+              className=" font-bold text-2xl text-primary hover:border-b-2 hover:border-primary w-fit"
+            >
               Cek Video Tutorial
             </Link>
           </div>

@@ -7,7 +7,7 @@ export default function Hero() {
   return (
     // Kontainer utama: Layout fleksibel min-h-screen, relatif untuk elemen dekoratif
     <div className="relative min-h-screen overflow-hidden bg-white flex items-center justify-center pt-10 pb-20 lg:py-0">
-      <div className="absolute top-0 right-0 w-full lg:w-2/5 h-full bg-transparent lg:bg-neutral rounded-bl-[150px] lg:rounded-bl-[350px] z-0"></div>
+      <div className="absolute top-0 right-0 w-full lg:w-2/5 h-full bg-transparent lg:bg-neutral lg:bg-linear-to-b lg:from-neutral lg:to-[#187863] rounded-bl-[150px] lg:rounded-bl-[350px] z-0"></div>
 
       {/* 📦 Konten Hero Utama 📦 */}
       {/* Kontainer dengan z-index di atas elemen dekoratif, menggunakan grid/flex untuk layout 2 kolom */}

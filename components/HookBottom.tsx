@@ -17,7 +17,7 @@ export default function HookTop() {
           {/* Card Kiri: Card Manfaat Kesehatan (Posisi Atas di Mobile) */}
           <div
             className="
-              relative z-10 isolate overflow-hidden bg-neutral 
+              relative z-10 isolate overflow-hidden bg-neutral bg-linear-to-b from-neutral to-[#187863] 
               max-w-full md:max-w-[500px] w-full p-6 sm:p-8 md:p-10 
               rounded-xl md:rounded-tr-3xl md:rounded-bl-3xl
               md:absolute md:left-1/6
@@ -98,7 +98,7 @@ export default function HookTop() {
             </p>
 
             {/* Badge nama di kanan-bawah */}
-            <div className="absolute bottom-4 right-4 bg-neutral text-white text-xs sm:text-sm px-3 sm:px-4 py-1.5 rounded-full shadow-md">
+            <div className="absolute bottom-4 right-4 bg-neutral  text-white text-xs sm:text-sm px-3 sm:px-4 py-1.5 rounded-full shadow-md">
               Ust Hanan Attaki
             </div>
           </div>

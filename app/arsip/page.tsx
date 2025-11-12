@@ -3,9 +3,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 
+// Konstanta URL dari .env
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_IMAGE_URL = process.env.NEXT_PUBLIC_API_IMAGE_URL;
 // --- 1. Konfigurasi dan Tipe Data ---
 
-const API_URL = "https://ts.crx.my.id/api/tutorials";
 const ITEMS_PER_PAGE = 9; // Untuk mencocokkan layout 3x3 yang Anda inginkan
 
 interface Tutorial {
@@ -153,7 +155,9 @@ const TutorialArchive: React.FC = () => {
   useEffect(() => {
     const fetchTutorials = async () => {
       try {
-        const response = await axios.get<{ data: Tutorial[] }>(API_URL);
+        const response = await axios.get<{ data: Tutorial[] }>(
+          `${API_URL}/tutorials`
+        );
         // Filter tutorial dengan status 'published' atau yang sesuai
         const publishedTutorials = response.data.data.filter(
           (t) => t.status === "published"
@@ -241,7 +245,7 @@ const TutorialArchive: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 sm:p-12 min-h-screen bg-white">
-      <h1 className="text-3xl sm:text-4xl font-extrabold text-center mb-8 md:mb-12 text-green-600">
+      <h1 className="text-3xl sm:text-4xl font-extrabold text-center mb-8 md:mb-12 text-primary">
         Arsip Video Tutorial
       </h1>
 

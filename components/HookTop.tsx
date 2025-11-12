@@ -27,8 +27,8 @@ export default function HookTop() {
   return (
     // Menggunakan warna latar belakang yang sangat terang/krem
     <div
-      className="hero"
-      style={{ backgroundColor: "#f5f4ed", padding: "6rem 0" }}
+      className="hero bg-linear-to-b from-[#ffffff] to-[#f5f4ed]"
+      style={{ padding: "6rem 0" }}
     >
       <div className="hero-content text-center py-0">
         <div className="max-w-4xl px-4">

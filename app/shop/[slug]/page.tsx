@@ -191,15 +191,20 @@ const ProductDetail = () => {
             {filteredVariants[0]?.name}
           </h1>
 
-          <div className="mt-2 md:mt-3 text-lg md:text-xl">
+          <div className="mt-2 md:mt-3 text-lg md:text-xl py-1 flex items-center">
             {hasDiscount && (
               <span className="line-through text-gray-400 pr-2">
-                Rp. {Number(currentSize?.price ?? 0).toLocaleString()}
+                Rp {Number(currentSize?.price ?? 0).toLocaleString()}
               </span>
             )}
             <span className="text-gray-600 font-medium text-2xl">
-              Rp. {Number(displayUnitPrice).toLocaleString()}
+              Rp {Number(displayUnitPrice).toLocaleString()}
             </span>
+            {hasDiscount && (
+              <span className="bg-accent text-white rounded-sm px-2 py-1 ml-3 text-sm font-semibold">
+                -{currentSize.discount}%
+              </span>
+            )}
           </div>
 
           {/* Pilihan Rasa */}

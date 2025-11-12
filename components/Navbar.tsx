@@ -20,7 +20,7 @@ import { logout } from "@/redux/slices/authSlice";
 // Definisikan daftar menu untuk menghindari pengulangan
 const menuItems = [
   { href: "/", label: "Beranda" },
-  { href: "/varian", label: "Varian" },
+  { href: "/brand-kami", label: "Brand Kami" },
   { href: "/reseller", label: "Reseller" },
   { href: "/afiliator", label: "Afiliator" },
   { href: "/tentang-kami", label: "Tentang Kami" },
