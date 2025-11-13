@@ -87,7 +87,7 @@ const Reseller = () => {
       {/* 1. SECTION HERO */}
       <section className="relative mb-20">
         <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen">
-          <div className="hero min-h-screen bg-neutral bg-linear-to-b overflow-hidden">
+          <div className="hero min-h-screen bg-neutral bg-linear-to-b from-neutral to-[#187863] overflow-hidden">
             <div className="hero-content flex-col lg:flex-row-reverse z-10 max-w-6xl mx-auto">
               {/* Gambar produk */}
               <Image
@@ -289,7 +289,7 @@ const Reseller = () => {
 
       {/* 5. SECTION CTA BANNER */}
       <section className="my-20">
-        <div className="hero min-h-28 bg-emerald-700 relative overflow-hidden rounded-2xl">
+        <div className="hero min-h-28 bg-neutral bg-linear-to-b from-neutral to-[#187863] relative overflow-hidden rounded-2xl">
           <div className="hero-content flex-col lg:flex-row z-10 max-w-6xl mx-auto">
             {/* Gambar produk */}
             <img

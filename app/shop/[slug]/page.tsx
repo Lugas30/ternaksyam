@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
+import Link from "next/link";
 
 import ImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
@@ -140,9 +141,25 @@ const ProductDetail = () => {
 
         dispatch(addItemToCart(itemToAdd));
 
+        const toastContent = (
+          <div>
+            {selectedVariant.name} - {selectedSizeName} berhasil ditambahkan ke
+            keranjang!
+            <br />
+            {/* Menggunakan Link langsung di dalam konten toast */}
+            <Link
+              href="/cart" // Ganti '/cart' dengan path keranjang Anda
+              className="underline text-secondary hover:text-primary font-bold leading-loose"
+              onClick={() => toast.dismiss()} // Opsional: tutup toast saat link diklik
+            >
+              Lihat Keranjang
+            </Link>
+          </div>
+        );
+
         toast.success(
-          `${selectedVariant.name} - ${selectedSizeName} berhasil ditambahkan ke keranjang!`,
-          { autoClose: 3000 }
+          toastContent,
+          { autoClose: 3000 } // Naikkan autoClose agar user sempat mengklik
         );
       }
     } else {

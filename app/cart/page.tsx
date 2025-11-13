@@ -6,7 +6,7 @@ import {
   updateItemQuantity,
   setCartMeta,
 } from "@/redux/slices/cartSlice";
-import { addToCart } from "@/redux/thunks/cartThunk";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";

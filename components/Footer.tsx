@@ -126,10 +126,10 @@ export default function Footer() {
   return (
     <>
       <footer
-        className="text-white relative overflow-hidden"
-        style={{
-          background: "linear-gradient(to bottom, #19996B, #106144)",
-        }}
+        className="text-white relative overflow-hidden bg-neutral bg-linear-to-b from-neutral to-[#187863]"
+        // style={{
+        //   background: "linear-gradient(to bottom, #19996B, #106144)",
+        // }}
       >
         {/* Latar Belakang Milk Splash */}
         <div
