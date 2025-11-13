@@ -10,6 +10,7 @@ import ProductSlider from "@/components/ProductSlider";
 import Testimonial from "@/components/Testimonial";
 import Article from "@/components/Article";
 import Slider from "@/components/Slider";
+import MobileBuyButton from "@/components/MobileBuyButton";
 
 import { getGuestToken } from "@/utils/guestToken";
 import JoinAF from "@/components/JoinAF";
@@ -56,6 +57,7 @@ export default function Home() {
       <section>
         <Article />
       </section>
+      <MobileBuyButton productUrl="/shop" />
     </>
   );
 }

@@ -73,3 +73,38 @@ html {
 body {
   font-family: manrope, sans-serif;
 }
+
+/* Dalam berkas CSS kustom Anda (misalnya globals.css) */
+
+@keyframes glow-pulse {
+  0% {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.4),
+      0 0 10px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8),
+      0 0 30px rgba(255, 255, 255, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.4),
+      0 0 10px rgba(255, 255, 255, 0.2);
+  }
+}
+
+@keyframes float-up-down {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px); /* Naik 5px */
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.glow-float-animation {
+  /* Terapkan kedua animasi */
+  animation: glow-pulse 3s infinite alternate,
+    float-up-down 2s infinite ease-in-out;
+}
