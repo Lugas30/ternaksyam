@@ -326,7 +326,6 @@ const AboutUsPage: React.FC = () => {
                   className="absolute top-0 left-0 w-full h-full"
                   src={data.profileSection.imageEmbedUrl}
                   title="Ternak Syams Profile Video"
-                  frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 ></iframe>

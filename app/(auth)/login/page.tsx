@@ -44,7 +44,7 @@ const Login = () => {
       await dispatch(login({ email, password })).unwrap();
       setIsLoading(false);
       toast.success("Login berhasil!");
-      router.push("/");
+      router.push("/account");
     } catch (err) {
       setIsLoading(false);
       // Menangani error dengan tepat (Logika Asli)
