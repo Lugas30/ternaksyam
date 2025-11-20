@@ -99,12 +99,12 @@ function VoucherCard({
 
   return (
     <div
-      className="flex bg-white rounded-xl overflow-hidden border border-gray-200 mb-4 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+      className="bg-white rounded-xl overflow-hidden border border-gray-200 mb-4 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
       onClick={() => onClick(voucher)}
     >
-      {/* Kolom Kiri - Informasi Diskon (Lebih Berani & Simpel) */}
+      {/* Kolom Atas - Informasi Diskon (Lebih Berani & Simpel) */}
       <div
-        className="w-1/3 md:w-1/4 flex flex-col items-center justify-center p-3 text-center"
+        className="flex flex-col items-center justify-center p-3 text-center"
         style={{
           background: `linear-gradient(to bottom right, ${primaryColor} 0%, #0a4837 100%)`,
           position: "relative",
@@ -125,19 +125,8 @@ function VoucherCard({
         </div>
       </div>
 
-      {/* Kolom Kanan - Detail Voucher */}
-      <div className="w-2/3 md:w-3/4 p-4 flex flex-col justify-between relative">
-        {/* Desain 'Potongan' Voucher yang Lebih Menarik */}
-        <div
-          className="absolute left-0 top-0 bottom-0 w-3 -ml-1.5"
-          style={{
-            clipPath:
-              "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 80%, 100% 75%, 0% 70%, 100% 65%, 0% 60%, 100% 55%, 0% 50%, 100% 45%, 0% 40%, 100% 35%, 0% 30%, 100% 25%, 0% 20%, 100% 15%, 0% 10%, 100% 5%, 0% 0%)",
-            backgroundColor: primaryColor,
-            opacity: 0.1, // Sedikit transparan
-          }}
-        ></div>
-
+      {/* Kolom Bawah - Detail Voucher */}
+      <div className=" p-4 flex flex-col justify-between relative">
         <div className="pl-2">
           <h3 className="text-base md:text-xl font-bold text-gray-900 line-clamp-2">
             {title}
@@ -443,9 +432,9 @@ export default function VoucherList() {
   }
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="">
       <h2 className="text-2xl md:text-[28px] font-bold text-gray-900 mb-2">
-        🎫 Daftar Voucher Aktif Saya
+        Daftar Voucher Aktif Saya 🎫
       </h2>
       <p className="mt-2 text-gray-500 mb-6">
         Klik voucher untuk melihat detail dan syarat & ketentuan.
