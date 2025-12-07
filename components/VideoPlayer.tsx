@@ -15,71 +15,52 @@ interface VideoPlayer {
 
 export default function VideoPlayer() {
   // 1. State untuk menyimpan data URL video dari API
-  const [videoData, setVideoData] = useState<VideoPlayer | null>(null);
-  // 2. State untuk menangani status loading
-  const [loading, setLoading] = useState<boolean>(true);
-  // 3. State untuk menangani error
-  const [error, setError] = useState<string | null>(null);
+  const [videoData, setVideoData] = useState<VideoPlayer | null>(null); // 2. State untuk menangani status loading
+  const [loading, setLoading] = useState<boolean>(true); // 3. State untuk menangani error
+  const [error, setError] = useState<string | null>(null); // Fungsi untuk mengambil data dari API
 
-  // Fungsi untuk mengambil data dari API
   useEffect(() => {
     const fetchVideoData = async () => {
       try {
         setLoading(true);
-        setError(null);
-        // Mengambil data dari endpoint
-        const response = await axios.get(VIDEO_PLAYER_API);
+        setError(null); // Mengambil data dari endpoint
+        const response = await axios.get(VIDEO_PLAYER_API); // Asumsi API mengembalikan objek tunggal (sesuai contoh data)
 
-        // Asumsi API mengembalikan objek tunggal (sesuai contoh data)
         setVideoData(response.data);
       } catch (err) {
-        console.error("Gagal mengambil data video:", err);
-        setError("Gagal memuat video. Silakan coba lagi nanti.");
+        // --- PERUBAHAN: HANYA TAMPILKAN ERROR PADA CONSOLE ---
+        console.error("Gagal mengambil data video:", err); // Set error state untuk menandai adanya error (agar tidak melanjutkan ke render utama)
+        setError("error");
+        setVideoData(null); // Pastikan data kosong jika terjadi error
       } finally {
         setLoading(false);
       }
     };
 
     fetchVideoData();
-  }, []); // Array kosong memastikan useEffect hanya berjalan sekali setelah render awal
-
-  // --- Rendering Conditional ---
+  }, []); // Array kosong memastikan useEffect hanya berjalan sekali setelah render awal // --- Rendering Conditional --- // Tampilkan loading saat data masih diambil
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-48">
-        <p className="text-lg font-medium text-gray-600">Memuat video...</p>
+        <p className="text-lg font-medium text-gray-600">Memuat video...</p>   
       </div>
     );
-  }
+  } // --- PERUBAHAN: JANGAN TAMPILKAN APAPUN JIKA ERROR ATAU DATA KOSONG --- // Jika terjadi error (setelah loading selesai), kembalikan null (tidak tampilkan apa-apa)
 
   if (error) {
-    return (
-      <div className="flex justify-center items-center h-48 bg-red-100 p-4 rounded-md border border-red-400">
-        <p className="text-lg font-semibold text-red-700">⚠️ {error}</p>
-      </div>
-    );
-  }
+    return null;
+  } // Jika data kosong atau tidak memiliki URL, kembalikan null (tidak tampilkan apa-apa)
 
   if (!videoData || !videoData.url) {
-    return (
-      <div className="flex justify-center items-center h-48 bg-yellow-100 p-4 rounded-md border border-yellow-400">
-        <p className="text-lg font-medium text-yellow-800">
-          Video tidak ditemukan.
-        </p>
-      </div>
-    );
-  }
+    return null;
+  } // --- Render Komponen Utama ---
 
-  // --- Render Komponen Utama ---
   return (
     <div className="shadow-xl overflow-hidden">
-      <iframe
-        // Gunakan URL yang didapat dari state (API)
-        src={videoData.url}
-        // Menggunakan kelas Tailwind CSS untuk lebar penuh dan rasio aspek video standar (16:9)
-        className="w-full aspect-video border-none"
-        // Atribut iframe standar untuk kinerja dan fungsionalitas
+      <iframe // Gunakan URL yang didapat dari state (API)
+        src={videoData.url} // Menggunakan kelas Tailwind CSS untuk lebar penuh dan rasio aspek video standar (16:9)
+        className="w-full aspect-video border-none" // Atribut iframe standar untuk kinerja dan fungsionalitas
         loading="lazy"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
