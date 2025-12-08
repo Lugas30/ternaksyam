@@ -4,45 +4,50 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 
-// Hapus atau abaikan import products.ts (data dummy)
-
-// Definisi tipe untuk produk dari API
 type ApiProduct = {
   id: number;
-  brand: string; // Akan digunakan sebagai title (atau subtitle)
-  variant: string; // Akan digunakan sebagai title (atau subtitle)
-  image: string; // Akan digunakan sebagai img
-  description: string; // Akan digunakan sebagai desc
-  // Anda dapat menambahkan properti lain dari respons API jika diperlukan
+  brand: string;
+  variant: string;
+  image: string;
+  description: string;
 };
 
-// Tipe untuk respon API secara keseluruhan
 type ApiResponse = {
   data: ApiProduct[];
 };
 
-// Konstanta API
-const API_URL = "https://ts.crx.my.id/api/variant-all-brand"; // Ganti dengan API_URL dari env jika sudah di setup
-// const API_IMAGE_URL = process.env.NEXT_PUBLIC_API_IMAGE_URL; // Tidak diperlukan karena URL gambar sudah lengkap
+const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = `${BASE_API_URL}/variant-all-brand`;
 
 export default function ProductSliderEmbla() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // --- Fetching Data dari API ---
   useEffect(() => {
+    if (!BASE_API_URL) {
+      console.error(
+        "Variabel lingkungan NEXT_PUBLIC_API_URL tidak terdefinisi."
+      );
+      setError("Konfigurasi API tidak lengkap.");
+      setIsLoading(false);
+      return;
+    }
+
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        // Menggunakan API_URL secara langsung dari konstanta
         const response = await axios.get<ApiResponse>(API_URL);
         setProducts(response.data.data);
         setError(null);
       } catch (err) {
         console.error("Gagal mengambil data produk:", err);
-        setError("Gagal memuat produk. Silakan coba lagi nanti.");
-        setProducts([]); // Kosongkan produk jika gagal
+        if (axios.isAxiosError(err) && err.response) {
+          setError(`Gagal memuat produk. Kode Status: ${err.response.status}`);
+        } else {
+          setError("Gagal memuat produk. Silakan coba lagi nanti.");
+        }
+        setProducts([]);
       } finally {
         setIsLoading(false);
       }
@@ -51,7 +56,6 @@ export default function ProductSliderEmbla() {
     fetchProducts();
   }, []);
 
-  // --- Konfigurasi Embla Carousel (Tetap Sama) ---
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop: false,
@@ -76,16 +80,13 @@ export default function ProductSliderEmbla() {
     setScrollSnaps(emblaApi.scrollSnapList());
     emblaApi.on("select", onSelect);
     onSelect();
-    // Cleanup function untuk menghapus listener saat komponen dilepas
     return () => {
       emblaApi.off("select", onSelect);
     };
-  }, [emblaApi, onSelect, products.length]); // Tambahkan products.length sebagai dependency agar dots terupdate
+  }, [emblaApi, onSelect, products.length]);
 
   const scrollTo = (i: number) => emblaApi && emblaApi.scrollTo(i);
-  // Navigasi prev/next dihilangkan karena di-comment di JSX
 
-  // --- Tampilan Render ---
   return (
     <section className="py-12">
       <div className="mx-auto max-w-7xl px-4">
@@ -93,9 +94,7 @@ export default function ProductSliderEmbla() {
           Category produk
         </h2>
 
-        {isLoading && (
-          <p className="text-center text-slate-600">Memuat produk...</p>
-        )}
+        {isLoading && <p className="loading loading-dots loading-lg"></p>}
         {error && (
           <p className="text-center text-red-600 font-medium">Error: {error}</p>
         )}
@@ -108,11 +107,8 @@ export default function ProductSliderEmbla() {
 
         {!isLoading && products.length > 0 && (
           <div className="relative">
-            {/* Tombol navigasi di-commented out */}
-
             <div className="overflow-hidden" ref={emblaRef}>
               <div className="flex gap-4 p-2">
-                {/* Mapping ke data API: products */}
                 {products.map((p: ApiProduct, i: number) => (
                   <article
                     key={p.id}
@@ -125,25 +121,23 @@ export default function ProductSliderEmbla() {
                           src={p.image}
                           alt={`${p.brand} ${p.variant}`}
                           className="h-full p-5 object-contain"
+                          width={300}
+                          height={300}
                           loading="lazy"
                         />
                       </div>
                       <div className="p-6">
-                        {/* Menampilkan Brand sebagai judul */}
                         {/* <h3 className=" text-emerald-900 font-bold leading-tight">
                           {p.brand}
                         </h3> */}
-                        {/* Menampilkan Variant sebagai sub-judul */}
                         <p className="text-emerald-900 font-semibold mt-1">
                           {p.variant}
                         </p>
-                        {/* Menampilkan Deskripsi */}
-                        {/* Hati-hati dengan XSS, tapi ini perlu karena deskripsi dari API berformat HTML */}
                         <div
                           className="mt-3 text-sm text-slate-600 line-clamp-3"
                           dangerouslySetInnerHTML={{
                             __html:
-                              p.description?.replace(/<\/?div>/g, "") || // HANYA panggil replace JIKA p.description BUKAN null/undefined
+                              p.description?.replace(/<\/?div>/g, "") ||
                               "Tidak ada deskripsi.",
                           }}
                         />

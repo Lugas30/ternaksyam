@@ -63,8 +63,8 @@ export default function LatestArticlesSection({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Endpoint API
-  const API_URL = "https://ts.crx.my.id/api/articles";
+  const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+  const API_URL = `${BASE_API_URL}/articles`;
 
   useEffect(() => {
     const fetchArticles = async () => {

@@ -129,7 +129,7 @@ const Slider: React.FC = () => {
   if (loading)
     return (
       <div className="text-center py-8 text-gray-600 font-medium">
-        ⏳ Memuat Slider...
+        <p className="loading loading-dots loading-lg"></p>
       </div>
     );
   if (error)

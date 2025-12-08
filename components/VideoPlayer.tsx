@@ -43,7 +43,7 @@ export default function VideoPlayer() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-48">
-        <p className="text-lg font-medium text-gray-600">Memuat video...</p>   
+        <p className="loading loading-dots loading-lg"></p>
       </div>
     );
   } // --- PERUBAHAN: JANGAN TAMPILKAN APAPUN JIKA ERROR ATAU DATA KOSONG --- // Jika terjadi error (setelah loading selesai), kembalikan null (tidak tampilkan apa-apa)

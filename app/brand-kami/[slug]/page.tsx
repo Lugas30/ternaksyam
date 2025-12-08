@@ -360,7 +360,7 @@ const BrandProfile: React.FC = () => {
         className={`text-center py-20 text-xl ${sectionPaddingClass}`}
         style={{ backgroundColor: "white" }}
       >
-        Memuat data untuk slug: **{slug}**... ⏳
+        <p className="loading loading-dots loading-lg"></p>
       </div>
     );
   }
@@ -368,7 +368,7 @@ const BrandProfile: React.FC = () => {
   if (error || !data) {
     return (
       <div
-        className={`text-center py-20 text-xl text-red-600 ${sectionPaddingClass}`}
+        className={`text-center py-20 text-sm ${sectionPaddingClass}`}
         style={{ backgroundColor: "white" }}
       >
         ⚠️ Terjadi kesalahan: **{error || "Data brand tidak tersedia."}**
@@ -621,15 +621,6 @@ const BrandProfile: React.FC = () => {
 
           {/* Kanan: Gambar Produk */}
           <div className="lg:w-1/2 flex justify-center lg:justify-start relative">
-            <div
-              className="absolute top-0 bottom-0 left-1/4 lg:left-0 w-3/4 lg:w-full bg-blue-50 rounded-l-3xl rounded-r-none lg:rounded-r-3xl"
-              style={{
-                height: "100%",
-                transform: "translateX(-25%)",
-                clipPath: "polygon(0 0, 100% 0, 100% 100%, 25% 100%)",
-                borderRadius: "0 80px 80px 0",
-              }}
-            ></div>
             <img
               src={currentData.howItWorks.imageURL}
               alt="Product in use with drinks"
@@ -657,12 +648,12 @@ const BrandProfile: React.FC = () => {
         px-20 py-4 rounded-full        
         text-xl          
         border-2 border-neutral
-        text-neutral           
-        bg-transparent             
+        text-white           
+        bg-neutral             
         font-bold       
         transition duration-300
-        hover:bg-neutral 
-        hover:text-white  
+        hover:bg-white
+        hover:text-neutral  
         hover:shadow-lg       
       "
           >

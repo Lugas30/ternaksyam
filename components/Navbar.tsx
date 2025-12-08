@@ -216,7 +216,7 @@ export default function Navbar() {
               <summary className="font-bold text-primary hover:text-secondary focus:text-secondary">
                 {item.label}
               </summary>
-              <ul className="p-2 bg-base-100 rounded-box w-52 shadow-lg z-[1]">
+              <ul className="p-2 bg-base-100 rounded-box w-52 shadow-lg z-1">
                 {item.children.map((child) => (
                   <li key={child.href}>
                     <a
