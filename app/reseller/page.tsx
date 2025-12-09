@@ -31,7 +31,6 @@ const Reseller = () => {
 
   // Konstanta URL dari .env
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const FAQ_API_URL = "https://ts.crx.my.id/api/faqs"; // URL API FAQ yang spesifik
 
   // 1. Fetch Benefits
   React.useEffect(() => {
@@ -59,7 +58,7 @@ const Reseller = () => {
     const getFaqs = async () => {
       setLoadingFaq(true);
       try {
-        const response = await axios.get(FAQ_API_URL);
+        const response = await axios.get(`${API_URL}/faqs`);
         if (response.data && Array.isArray(response.data)) {
           // Filter data hanya untuk target "reseller" dan status "show"
           const filteredFaqs = response.data.filter(

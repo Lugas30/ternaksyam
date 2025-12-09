@@ -38,12 +38,6 @@ interface FaqItem {
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const API_IMAGE_URL = process.env.NEXT_PUBLIC_API_IMAGE_URL;
 
-// URL API untuk benefit affiliator (Tetap)
-const BENEFIT_API_URL = "https://ts.crx.my.id/api/benefit/affiliates";
-
-// URL API untuk FAQ (BARU)
-const FAQ_API_URL = "https://ts.crx.my.id/api/faqs";
-
 const Afiliator = () => {
   // 1. State untuk menyimpan data benefit (Tetap)
   const [benefits, setBenefits] = useState<benefit[]>([]);
@@ -62,7 +56,7 @@ const Afiliator = () => {
     const fetchBenefits = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(BENEFIT_API_URL);
+        const response = await axios.get(`${API_URL}/benefit/affiliates`);
         // Asumsi data benefit berada dalam properti 'data'
         setBenefits(response.data.data || []);
         setError(null);
@@ -83,7 +77,7 @@ const Afiliator = () => {
     const fetchFaqs = async () => {
       try {
         setLoadingFaq(true);
-        const response = await axios.get(FAQ_API_URL);
+        const response = await axios.get(`${API_URL}/faqs`);
 
         // **Filter data:** Hanya yang memiliki "target": "affiliate"
         const filteredData = response.data.filter(
