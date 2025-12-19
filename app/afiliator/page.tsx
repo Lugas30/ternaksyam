@@ -3,10 +3,9 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { ChevronRight, CheckCircle2, MessageCircle } from "lucide-react";
 
-// --- Definisikan Tipe Data ---
-
-// Tipe data untuk benefit (tetap dari kode asli)
+// --- Types ---
 interface benefit {
   id: number;
   type: string;
@@ -15,7 +14,6 @@ interface benefit {
   status: string;
 }
 
-// Tipe data untuk FAQ (BARU)
 interface FaqItem {
   id: number;
   question: string;
@@ -23,391 +21,278 @@ interface FaqItem {
   category_id: number;
   target: "user" | "affiliate" | "reseller" | "all";
   status: string;
-  created_at: string;
-  updated_at: string;
-  category: {
-    id: number;
-    name: string;
-    slug: string;
-    created_at: string;
-    updated_at: string;
-  };
+  category: { name: string };
 }
 
-// Konstanta URL dari .env
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const API_IMAGE_URL = process.env.NEXT_PUBLIC_API_IMAGE_URL;
 
 const Afiliator = () => {
-  // 1. State untuk menyimpan data benefit (Tetap)
   const [benefits, setBenefits] = useState<benefit[]>([]);
-  // State untuk menangani status loading (Tetap)
   const [loading, setLoading] = useState(true);
-  // State untuk menangani error (Tetap)
   const [error, setError] = useState<string | null>(null);
 
-  // State baru untuk data FAQ (BARU)
   const [faqData, setFaqData] = useState<FaqItem[]>([]);
   const [loadingFaq, setLoadingFaq] = useState(true);
-  const [errorFaq, setErrorFaq] = useState<string | null>(null);
 
-  // 2. Fungsi untuk mengambil data benefit (Tetap)
   useEffect(() => {
-    const fetchBenefits = async () => {
+    const fetchData = async () => {
       try {
-        setLoading(true);
-        const response = await axios.get(`${API_URL}/benefit/affiliates`);
-        // Asumsi data benefit berada dalam properti 'data'
-        setBenefits(response.data.data || []);
-        setError(null);
+        const [resBenefit, resFaq] = await Promise.all([
+          axios.get(`${API_URL}/benefit/affiliates`),
+          axios.get(`${API_URL}/faqs`),
+        ]);
+        setBenefits(resBenefit.data.data || []);
+        setFaqData(
+          resFaq.data.filter((item: FaqItem) => item.target === "affiliate")
+        );
       } catch (err) {
-        console.error("Gagal mengambil data benefit:", err);
-        setError("Gagal memuat data benefit. Silakan coba lagi.");
-        setBenefits([]); // Kosongkan data jika gagal
+        setError("Gagal memuat data.");
       } finally {
         setLoading(false);
-      }
-    };
-
-    fetchBenefits();
-  }, []);
-
-  // 2b. Fungsi untuk mengambil data FAQ (BARU)
-  useEffect(() => {
-    const fetchFaqs = async () => {
-      try {
-        setLoadingFaq(true);
-        const response = await axios.get(`${API_URL}/faqs`);
-
-        // **Filter data:** Hanya yang memiliki "target": "affiliate"
-        const filteredData = response.data.filter(
-          (item: FaqItem) => item.target === "affiliate"
-        );
-
-        setFaqData(filteredData);
-        setErrorFaq(null);
-      } catch (err) {
-        console.error("Gagal mengambil data FAQ:", err);
-        setErrorFaq("Gagal memuat data FAQ Affiliate. Silakan coba lagi.");
-        setFaqData([]);
-      } finally {
         setLoadingFaq(false);
       }
     };
-
-    fetchFaqs();
+    fetchData();
   }, []);
 
-  // Komponen Card Benefit yang lebih ringkas (Tetap)
+  // --- Sub-Components ---
   const BenefitCard = ({ benefitData }: { benefitData: benefit }) => (
-    <div className="card w-auto bg-base-100 shadow-sm">
-      <div className="card-body">
+    <div className="group bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+      <div className="w-16 h-16 mb-6 mx-auto bg-emerald-50 rounded-2xl flex items-center justify-center group-hover:bg-emerald-500 transition-colors">
         <img
-          // Gunakan URL thumbnail dari data API
           src={benefitData.thumbnail}
-          alt={benefitData.benefit} // Gunakan benefit sebagai alt text
-          className="mb-3 w-1/4 h-auto mx-auto object-contain"
-        ></img>
-        <span className="text-sm text-center">
-          {/* Tampilkan deskripsi benefit */}
-          {benefitData.benefit}
-        </span>
+          alt={benefitData.benefit}
+          className="w-10 h-10 object-contain group-hover:brightness-0 group-hover:invert transition-all"
+        />
       </div>
+      <p className="text-gray-700 font-medium text-center leading-relaxed">
+        {benefitData.benefit}
+      </p>
     </div>
   );
 
-  // Komponen Accordion FAQ (BARU)
-  const AffiliateFaqAccordion = ({ faqItem }: { faqItem: FaqItem }) => (
-    <div className="collapse collapse-plus bg-gray-200 rounded-xl shadow-sm">
-      <input type="checkbox" className="peer" />
-      <div className="collapse-title text-base md:text-lg font-medium">
-        {faqItem.question}
+  const TestimonialCard = ({
+    text,
+    name,
+    handle,
+  }: {
+    text: string;
+    name: string;
+    handle: string;
+  }) => (
+    <div className="bg-white p-8 rounded-4xl shadow-sm border border-gray-100 relative">
+      <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-100 rounded-bl-4xl flex items-center justify-center">
+        <img src="/images/kutip.svg" className="w-6 h-6 invert" alt="quote" />
       </div>
-      {/* Gunakan dangerouslySetInnerHTML untuk menampilkan answer yang mungkin mengandung HTML/format teks */}
-      <div className="collapse-content text-sm md:text-base text-base-content/80">
-        <p dangerouslySetInnerHTML={{ __html: faqItem.answer }} />
+      <p className="text-gray-600 italic mb-8 mt-4 leading-relaxed">"{text}"</p>
+      <div className="flex items-center gap-4">
+        <div className="avatar">
+          <div className="w-12 rounded-full ring ring-emerald-100">
+            <img
+              src="https://img.daisyui.com/images/profile/demo/yellingcat@192.webp"
+              alt="avatar"
+            />
+          </div>
+        </div>
+        <div>
+          <h4 className="font-bold text-gray-900">{name}</h4>
+          <span className="text-sm text-emerald-600">{handle}</span>
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="container mx-auto px-3 md:px-5 lg:px-10">
-      <section className="relative mb-20">
-        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen">
-          <div className="hero min-h-screen bg-neutral relative overflow-hidden">
-            <div className="hero-content flex-col lg:flex-row-reverse z-10 max-w-6xl mx-auto">
-              {/* Gambar produk */}
-              <img
-                src={"/images/women1.png"}
-                alt="Produk Etawa"
-                width={500}
-                height={500}
-              />
+    <div className="bg-[#FAFAFA] overflow-x-hidden">
+      {/* Hero Section */}
+      <section className="relative min-h-[90vh] flex items-center bg-neutral bg-linear-to-b from-neutral to-[#187863] text-white overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+          <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-emerald-500 rounded-full blur-[120px]" />
+        </div>
 
-              {/* Teks */}
-              <div className="text-white lg:mr-10">
-                <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-                  Promosikan dan Panen Komisi dengan Affiliate Ternak Syams
-                  Sekarang
-                </h1>
-                <p className="py-6 text-green-100 text-lg">
-                  Daftar sekali, cuan berkali-kali!
-                </p>
-                <Link href="/daftar-afiliator">
-                  <button className="btn btn-primary hover:bg-secondary border-none px-8 py-6 my-8 font-bold text-base rounded-full text-white">
-                    Daftar Afiliator
-                  </button>
+        <div className="container mx-auto px-6 lg:px-16 py-20 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="order-2 lg:order-1">
+              <h1 className="text-4xl md:text-6xl font-extrabold leading-[1.1] mb-6">
+                Promosikan & Panen{" "}
+                <span className="text-emerald-400">Komisi</span> Melimpah
+              </h1>
+              <p className="text-lg text-gray-100 mb-10 max-w-lg">
+                Bergabunglah dengan ekosistem Ternak Syams. Daftar sekali,
+                nikmati pendapatan pasif berkali-kali!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/daftar-afiliator"
+                  className="btn btn-primary btn-lg rounded-full px-10 border-none hover:scale-105 transition-transform"
+                >
+                  Daftar Afiliator Sekarang
                 </Link>
               </div>
             </div>
+            <div className="order-1 lg:order-2 flex justify-center relative">
+              <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full animate-pulse" />
+              <img
+                src="/images/women1.png"
+                alt="Hero"
+                className="relative w-full max-w-md drop-shadow-2xl"
+              />
+            </div>
           </div>
         </div>
       </section>
-      <section className="my-20">
-        <h3 className="text-2xl md:text-3xl text-center font-bold leading-tight mb-10">
-          Mudah dan Banyak keuntungannya, lho !
-        </h3>
-        {/* Benefit Affiliate */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* 3. Menampilkan status loading, error, atau data benefit */}
+
+      {/* Benefits Section */}
+      <section className="py-24 container mx-auto px-6 lg:px-16">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Mudah & Menguntungkan
+          </h2>
+          <p className="text-gray-500">
+            Nikmati berbagai fasilitas eksklusif yang kami sediakan untuk
+            mendukung kesuksesan Anda.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {loading ? (
-            // Tampilkan loading state
-            <div className="col-span-full text-center py-10">
-              <span className="loading loading-spinner loading-lg text-primary"></span>
-              <p>Memuat benefit...</p>
+            <div className="col-span-full flex flex-col items-center py-20">
+              <span className="loading loading-ring loading-lg text-emerald-500"></span>
             </div>
-          ) : error ? (
-            // Tampilkan error state
-            <div className="col-span-full text-center py-10 text-error">
-              <p>{error}</p>
-            </div>
-          ) : benefits.length > 0 ? (
-            // Render card benefit menggunakan data dari API
-            benefits.map((benefitItem) => (
-              <BenefitCard key={benefitItem.id} benefitData={benefitItem} />
-            ))
           ) : (
-            // Tampilkan pesan jika tidak ada data
-            <div className="col-span-full text-center py-10 text-gray-500">
-              <p>Tidak ada data benefit yang tersedia saat ini.</p>
-            </div>
+            benefits.map((item) => (
+              <BenefitCard key={item.id} benefitData={item} />
+            ))
           )}
         </div>
       </section>
-      <section className="my-20">
-        <h3 className="text-2xl md:text-3xl text-center font-bold leading-tight mb-10">
-          Bagaimana cara promosinya?
-        </h3>
 
-        <div className="grid grid-cols-3 gap-8">
-          <img
-            src={"/images/afiliate-capture.png"}
-            className="w-full col-span-2"
-          ></img>
-          <div className="flex flex-col justify-center">
-            <p className="text-lg font-semibold mb-5">
-              Cukup share link affiliate, buat konten keranjang kuning, dan live
-              streaming kapanpun dimanapun
-            </p>
-            <Link
-              href="/arsip"
-              className=" font-bold text-2xl text-primary hover:border-b-2 hover:border-primary w-fit"
-            >
-              Cek Video Tutorial
-            </Link>
-          </div>
-        </div>
-      </section>
-      <section className="my-20 py-20 bg-stone-200 relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen">
-        <div className="container mx-auto px-3 md:px-5 lg:px-10 grid grid-cols-3 gap-4">
-          <div className="card w-auto min-h-72 md:min-h-80 bg-base-100 shadow-sm relative overflow-hidden">
-            {/* Seperempat lingkaran hijau di pojok kanan atas */}
-            <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary rounded-bl-full flex items-center justify-center">
+      {/* Tutorial Section */}
+      <section className="py-24 bg-white border-y border-gray-100">
+        <div className="container mx-auto px-6 lg:px-16">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="relative group cursor-pointer">
+              <div className="absolute -inset-4 bg-emerald-500/5 rounded-[2.5rem] scale-95 group-hover:scale-100 transition-all" />
               <img
-                src={"/images/kutip.svg"}
-                className="mb-3 ml-3 object-contain"
+                src="/images/afiliate-capture.png"
+                alt="Tutorial"
+                className="relative rounded-4xl shadow-2xl border border-gray-100"
               />
             </div>
-
-            <div className="card-body relative flex flex-col justify-between">
-              {/* Deskripsi ditengah */}
-              <p className="text-sm grow flex items-center justify-center text-center mt-16">
-                Berkat ngonten affiliates aku berhasil beli iPhone 13 Pro Max
-                buat menunjang bikin konten dan juga bisa renovasi kamar serta
-                taman rumah.
-              </p>
-
-              {/* Bagian profil tetap di bawah */}
-              <div className="flex items-center">
-                <div className="avatar">
-                  <div className="w-12 rounded-full">
-                    <img src="https://img.daisyui.com/images/profile/demo/yellingcat@192.webp" />
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <p>Yelling Cat</p>
-                  <span>@yellingwoman</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="card w-auto min-h-72 md:min-h-80 bg-base-100 shadow-sm relative overflow-hidden">
-            {/* Seperempat lingkaran hijau di pojok kanan atas */}
-            <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary rounded-bl-full flex items-center justify-center">
-              <img
-                src={"/images/kutip.svg"}
-                className="mb-3 ml-3 object-contain"
-              />
-            </div>
-
-            <div className="card-body relative flex flex-col justify-between">
-              {/* Deskripsi ditengah */}
-              <p className="text-sm grow flex items-center justify-center text-center mt-16">
-                Berkat ngonten affiliates aku berhasil beli iPhone 13 Pro Max
-                buat menunjang bikin konten dan juga bisa renovasi kamar serta
-                taman rumah.
-              </p>
-
-              {/* Bagian profil tetap di bawah */}
-              <div className="flex items-center">
-                <div className="avatar">
-                  <div className="w-12 rounded-full">
-                    <img src="https://img.daisyui.com/images/profile/demo/yellingcat@192.webp" />
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <p>Yelling Cat</p>
-                  <span>@yellingwoman</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="card w-auto min-h-72 md:min-h-80 bg-base-100 shadow-sm relative overflow-hidden">
-            {/* Seperempat lingkaran hijau di pojok kanan atas */}
-            <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary rounded-bl-full flex items-center justify-center">
-              <img
-                src={"/images/kutip.svg"}
-                className="mb-3 ml-3 object-contain"
-              />
-            </div>
-
-            <div className="card-body relative flex flex-col justify-between">
-              {/* Deskripsi ditengah */}
-              <p className="text-sm grow flex items-center justify-center text-center mt-16">
-                Berkat ngonten affiliates aku berhasil beli iPhone 13 Pro Max
-                buat menunjang bikin konten dan juga bisa renovasi kamar serta
-                taman rumah.
-              </p>
-
-              {/* Bagian profil tetap di bawah */}
-              <div className="flex items-center">
-                <div className="avatar">
-                  <div className="w-12 rounded-full">
-                    <img src="https://img.daisyui.com/images/profile/demo/yellingcat@192.webp" />
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <p>Yelling Cat</p>
-                  <span>@yellingwoman</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section className="my-20">
-        <div className="mb-10">
-          <h3 className="text-center text-3xl font-bold mb-4">
-            Semua bisa jadi Affiliate Professional
-          </h3>
-          <p className="text-center">
-            Pelatihan rutin untuk para mitra agar bisa menjadi Affiliate
-            Professional
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <img src="/images/training1.png" className="mx-auto" />
-          <img src="/images/training2.png" className="mx-auto" />
-        </div>
-        <img src="/images/gtapro.png" className="mx-auto" />
-      </section>
-
-      <section className="my-20">
-        <div className="hero min-h-28 bg-neutral relative overflow-hidden rounded-2xl">
-          <div className="hero-content flex-col lg:flex-row z-10 max-w-6xl mx-auto">
-            {/* Gambar produk */}
-            <img
-              src="/images/women2.png"
-              alt="daftar affilator"
-              width={350}
-              className="my-5 p-3"
-            />
-
-            {/* Teks */}
-            <div className="text-white lg:mr-10">
-              <h1 className="text-2xl md:text-3xl font-bold leading-tight">
-                Siap mulai jadi reseller dan punya penghasilan sendiri?
-              </h1>
-              <p className="py-6 text-green-100 text-lg">
-                Daftar sekali, cuan berkali-kali!
-              </p>
-              <Link href="/daftar-afiliator">
-                <button className="btn btn-primary hover:bg-secondary border-none px-8 py-6 my-8 font-bold text-base rounded-full text-white">
-                  Daftar Afiliator
-                </button>
+            <div>
+              <h2 className="text-3xl lg:text-5xl font-extrabold mb-8 leading-tight">
+                Bagaimana Cara <br /> Promosinya?
+              </h2>
+              <ul className="space-y-6 mb-10">
+                {[
+                  "Share link affiliate ke rekan & sosmed",
+                  "Buat konten kreatif Keranjang Kuning",
+                  "Live streaming kapanpun Anda mau",
+                ].map((step, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center gap-4 text-lg text-gray-700"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                      {i + 1}
+                    </div>
+                    {step}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/arsip"
+                className="inline-flex items-center gap-2 text-emerald-600 font-bold text-xl hover:gap-4 transition-all"
+              >
+                Pelajari Tutorial Lengkap <ChevronRight />
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* -------------------------------------------------------------
-        BAGIAN FAQ AFFILIATE BARU (Sesuai Permintaan)
-        ------------------------------------------------------------- 
-      */}
-      <section className="py-10">
-        <div className="mx-auto max-w-3xl px-4">
-          {/* Title Baru untuk FAQ Affiliate */}
-          <h2 className="text-center text-2xl md:text-3xl font-extrabold text-emerald-900 mb-8">
-            Pertanyaan yang Sering Diajukan (Affiliate)
+      {/* Testimonials */}
+      <section className="py-24 bg-[#F2F4F7]">
+        <div className="container mx-auto px-6 lg:px-16">
+          <h2 className="text-3xl font-bold text-center mb-16 text-gray-900">
+            Kisah Sukses Affiliate
           </h2>
-
-          {/* Accordions FAQ Affiliate */}
-          <div className="mt-6 space-y-3">
-            {loadingFaq ? (
-              <div className="text-center py-10">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
-                <p>Memuat FAQ Affiliate...</p>
-              </div>
-            ) : errorFaq ? (
-              <div className="text-center py-10 text-error">
-                <p>{errorFaq}</p>
-              </div>
-            ) : faqData.length > 0 ? (
-              faqData.map((faqItem) => (
-                <AffiliateFaqAccordion key={faqItem.id} faqItem={faqItem} />
-              ))
-            ) : (
-              <div className="text-center py-10 text-gray-500">
-                <p>
-                  Belum ada pertanyaan yang tersedia untuk Affiliate saat ini.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* CTA (Dibiarkan sama) */}
-          <div className="mt-6 flex justify-center">
-            <Link href="/#">
-              <button className="btn bg-primary hover:bg-green-950 px-8 py-6 my-8 font-bold text-base rounded-full text-white">
-                Selengkapnya
-              </button>
-            </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <TestimonialCard
+              text="Berkat ngonten affiliates aku berhasil beli iPhone 13 Pro Max buat menunjang konten dan renovasi kamar."
+              name="Siti Rahma"
+              handle="@sitirhma_"
+            />
+            <TestimonialCard
+              text="Awalnya iseng share link, ternyata komisinya bisa buat bayar cicilan motor. Sangat membantu!"
+              name="Budi Santoso"
+              handle="@budis_aff"
+            />
+            <TestimonialCard
+              text="Pelatihannya sangat detail, dari nol sampai bisa dapet jutaan per minggu. Recommended banget!"
+              name="Andini Putri"
+              handle="@andinip"
+            />
           </div>
         </div>
       </section>
 
-      {/* BAGIAN FAQ LAMA ASLI DIHAPUS, DIGANTIKAN DENGAN IMPLEMENTASI BARU */}
+      {/* CTA Section */}
+      <section className="py-20 container mx-auto px-6 lg:px-16">
+        <div className="bg-linear-to-r from-emerald-800 to-emerald-600 rounded-[3rem] p-12 text-center text-white relative overflow-hidden">
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">
+            Mulai Perjalanan Cuanmu
+          </h2>
+          <p className="text-emerald-100 text-lg mb-10 max-w-2xl mx-auto">
+            Jangan lewatkan kesempatan menjadi bagian dari mitra sukses kami.
+            Pendaftaran gratis dan pelatihan disediakan!
+          </p>
+          <Link
+            href="/daftar-afiliator"
+            className="btn btn-white btn-lg rounded-full px-12 bg-white text-emerald-600 border-none hover:bg-emerald-50 shadow-xl text-lg"
+          >
+            Daftar Sekarang
+          </Link>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-3xl mx-auto px-6">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <MessageCircle className="text-emerald-500" />
+            <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm">
+              FAQ
+            </span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-center text-gray-900 mb-12">
+            Pertanyaan Populer
+          </h2>
+
+          <div className="space-y-4">
+            {loadingFaq ? (
+              <div className="text-center py-10">
+                <span className="loading loading-dots loading-lg text-emerald-500"></span>
+              </div>
+            ) : (
+              faqData.map((faqItem) => (
+                <div
+                  key={faqItem.id}
+                  className="collapse collapse-plus bg-white border border-gray-100 shadow-sm rounded-2xl"
+                >
+                  <input type="checkbox" className="peer" />
+                  <div className="collapse-title text-lg font-bold text-gray-800 peer-checked:text-emerald-600 transition-colors">
+                    {faqItem.question}
+                  </div>
+                  <div className="collapse-content text-gray-600 leading-relaxed border-t border-gray-50 pt-4">
+                    <div dangerouslySetInnerHTML={{ __html: faqItem.answer }} />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

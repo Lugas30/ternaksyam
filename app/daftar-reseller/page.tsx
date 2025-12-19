@@ -1,7 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+
+type LocationOption = {
+  id: number;
+  name: string;
+};
 
 type FormState = {
   name: string;
@@ -18,7 +23,7 @@ type FormState = {
   agree: boolean;
 };
 
-const daftarReseller: React.FC = () => {
+const DaftarReseller: React.FC = () => {
   const [form, setForm] = useState<FormState>({
     name: "",
     whatsapp: "",
@@ -34,6 +39,11 @@ const daftarReseller: React.FC = () => {
     agree: false,
   });
 
+  // State untuk menyimpan opsi data dari API
+  const [provinces, setProvinces] = useState<LocationOption[]>([]);
+  const [cities, setCities] = useState<LocationOption[]>([]);
+  const [districts, setDistricts] = useState<LocationOption[]>([]);
+
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [status, setStatus] = useState<{
     type: "" | "success" | "error";
@@ -43,9 +53,60 @@ const daftarReseller: React.FC = () => {
     message: "",
   });
 
-  // onChange untuk semua <input> (termasuk checkbox) — TIDAK DIUBAH
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  // 1. Ambil data Provinsi saat pertama kali load
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const res = await axios.get(`${baseUrl}/provinces`);
+        setProvinces(res.data.data);
+      } catch (err) {
+        console.error("Error fetch provinces", err);
+      }
+    };
+    fetchProvinces();
+  }, [baseUrl]);
+
+  // 2. Ambil data Kota saat Provinsi berubah
+  useEffect(() => {
+    if (form.province) {
+      const fetchCities = async () => {
+        try {
+          const res = await axios.get(`${baseUrl}/cities/${form.province}`);
+          setCities(res.data.data);
+          // Reset pilihan di bawahnya jika provinsi diganti
+          setForm((prev) => ({ ...prev, city: "", district: "" }));
+          setDistricts([]);
+        } catch (err) {
+          console.error("Error fetch cities", err);
+        }
+      };
+      fetchCities();
+    }
+  }, [form.province, baseUrl]);
+
+  // 3. Ambil data Kecamatan saat Kota berubah
+  useEffect(() => {
+    if (form.city) {
+      const fetchDistricts = async () => {
+        try {
+          const res = await axios.get(`${baseUrl}/districts/${form.city}`);
+          setDistricts(res.data.data);
+          setForm((prev) => ({ ...prev, district: "" }));
+        } catch (err) {
+          console.error("Error fetch districts", err);
+        }
+      };
+      fetchDistricts();
+    }
+  }, [form.city, baseUrl]);
+
+  const onChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -54,12 +115,10 @@ const daftarReseller: React.FC = () => {
 
   const onlyDigits = (s: string) => s.replace(/\D/g, "");
 
-  // Submit form — TIDAK DIUBAH
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus({ type: "", message: "" });
 
-    // Validasi minimal — TIDAK DIUBAH
     if (!form.agree) {
       setStatus({
         type: "error",
@@ -67,33 +126,26 @@ const daftarReseller: React.FC = () => {
       });
       return;
     }
-    if (!form.name || !form.whatsapp || !form.email || !form.address) {
-      setStatus({
-        type: "error",
-        message: "Nama, WhatsApp, Email, dan Alamat wajib diisi.",
-      });
-      return;
-    }
 
+    // --- PENYESUAIAN PAYLOAD DENGAN API POST BARU ---
     const payload = {
-      name: form.name.trim(),
+      name: form.name,
       whatsapp: onlyDigits(form.whatsapp),
-      email: form.email.trim(),
-      address: form.address.trim(),
-      province: form.province.trim(),
-      city: form.city.trim(),
-      district: form.district.trim(),
-      postal_code: form.postal_code.trim(),
-      bank: form.bank.trim(),
-      account_name: form.account_name.trim(),
+      email: form.email,
+      address: form.address,
+      province_id: Number(form.province), // Konversi ID ke Number
+      city_id: Number(form.city), // Konversi ID ke Number
+      district_id: Number(form.district), // Konversi ID ke Number
+      postal_code: Number(form.postal_code),
+      bank: form.bank,
+      account_name: form.account_name,
       account_number: onlyDigits(form.account_number),
     };
 
     try {
       setSubmitting(true);
-      await axios.post("https://ts.crx.my.id/api/reseller/register", payload, {
-        headers: { "Content-Type": "application/json" },
-      });
+      // Endpoint POST : {{base_url}}/reseller/register
+      await axios.post(`${baseUrl}/reseller/register`, payload);
 
       setStatus({
         type: "success",
@@ -101,6 +153,7 @@ const daftarReseller: React.FC = () => {
           "Pendaftaran berhasil! Kami akan menghubungi Anda via WhatsApp/Email.",
       });
 
+      // Reset form ke kondisi awal
       setForm({
         name: "",
         whatsapp: "",
@@ -117,22 +170,18 @@ const daftarReseller: React.FC = () => {
       });
     } catch (err: any) {
       const apiMsg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Terjadi kesalahan. Coba lagi.";
+        err?.response?.data?.message || err?.message || "Terjadi kesalahan.";
       setStatus({ type: "error", message: apiMsg });
     } finally {
       setSubmitting(false);
     }
   };
 
-  // helper: tutup modal tanpa mengubah alur bisnis
   const closeModal = () => setStatus({ type: "", message: "" });
 
   return (
     <main className="min-h-screen bg-base-100 text-base-content">
       <div className="mx-auto w-full max-w-sm md:max-w-md px-4 py-10">
-        {/* Header ala affiliate */}
         <h1 className="text-3xl font-extrabold text-center text-primary">
           Daftar Reseller
         </h1>
@@ -140,11 +189,9 @@ const daftarReseller: React.FC = () => {
           Harap isi form berikut ini dengan data yang valid
         </p>
 
-        {/* Card Form ala affiliate */}
         <div className="card bg-white shadow-md mt-6">
           <div className="card-body">
             <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Section: Data Diri */}
               <p className="font-semibold text-sm text-base-content/80">
                 Data Diri Mitra
               </p>
@@ -191,34 +238,57 @@ const daftarReseller: React.FC = () => {
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <input
+                {/* SELECT PROVINSI */}
+                <select
                   name="province"
                   value={form.province}
                   onChange={onChange}
-                  placeholder="Provinsi"
-                  className="input input-bordered w-full"
+                  className="select select-bordered w-full rounded-lg px-2"
                   required
-                />
+                >
+                  <option value="">Provinsi</option>
+                  {provinces.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
 
-                <input
+                {/* SELECT KOTA */}
+                <select
                   name="city"
                   value={form.city}
                   onChange={onChange}
-                  placeholder="Kota"
-                  className="input input-bordered w-full"
+                  className="select select-bordered w-full rounded-lg px-2"
                   required
-                />
+                  disabled={!form.province}
+                >
+                  <option value="">Kota</option>
+                  {cities.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <input
+                {/* SELECT KECAMATAN */}
+                <select
                   name="district"
                   value={form.district}
                   onChange={onChange}
-                  placeholder="Kecamatan"
-                  className="input input-bordered w-full"
+                  className="select select-bordered w-full rounded-lg px-2"
                   required
-                />
+                  disabled={!form.city}
+                >
+                  <option value="">Kecamatan</option>
+                  {districts.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
                 <input
                   name="postal_code"
                   value={form.postal_code}
@@ -230,7 +300,6 @@ const daftarReseller: React.FC = () => {
                 />
               </div>
 
-              {/* Section: Rekening */}
               <p className="font-semibold text-sm text-base-content/80 mt-2">
                 Data Rekening Pembayaran
               </p>
@@ -261,7 +330,6 @@ const daftarReseller: React.FC = () => {
                 required
               />
 
-              {/* Agreement ala affiliate */}
               <div className="form-control mt-2">
                 <label className="label cursor-pointer justify-start gap-3">
                   <input
@@ -272,13 +340,15 @@ const daftarReseller: React.FC = () => {
                     className="checkbox checkbox-sm"
                   />
                   <span className="label-text text-sm">
-                    Menyetujui <a className="underline">Syarat dan Ketentuan</a>{" "}
+                    Menyetujui{" "}
+                    <a className="underline cursor-pointer">
+                      Syarat dan Ketentuan
+                    </a>{" "}
                     yang berlaku
                   </span>
                 </label>
               </div>
 
-              {/* Button ala affiliate */}
               <button
                 type="submit"
                 disabled={submitting}
@@ -294,23 +364,19 @@ const daftarReseller: React.FC = () => {
           </div>
         </div>
 
-        {/* Catatan ala affiliate di bawah tombol */}
         <div className="bg-yellow-100 rounded-box p-4 mt-6 text-sm text-base-content/80">
           Konfirmasi pendaftaran akan dikirimkan ke email anda, <br />
           Tim kami akan menghubungi anda dalam 2×24 Jam
         </div>
       </div>
 
-      {/* Modal Sukses — tampilan identik seperti affiliate, logika tetap pakai state `status` */}
+      {/* Modal Sukses */}
       <dialog
         className={`modal ${status.type === "success" ? "modal-open" : ""}`}
       >
         <div className="modal-box">
           <h3 className="font-bold text-lg">Pendaftaran Berhasil!</h3>
-          <p className="py-4">
-            {status.message ||
-              "Pendaftaran berhasil. Tim kami akan menghubungi Anda dalam 2×24 jam."}
-          </p>
+          <p className="py-4">{status.message}</p>
           <div className="modal-action">
             <button className="btn" onClick={closeModal}>
               Tutup
@@ -322,15 +388,13 @@ const daftarReseller: React.FC = () => {
         </form>
       </dialog>
 
-      {/* Modal Error — tampilan identik seperti affiliate */}
+      {/* Modal Error */}
       <dialog
         className={`modal ${status.type === "error" ? "modal-open" : ""}`}
       >
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Pendaftaran Gagal</h3>
-          <p className="py-4">
-            {status.message || "Terjadi kesalahan. Silakan coba lagi."}
-          </p>
+        <div className="modal-box border-t-4 border-error">
+          <h3 className="font-bold text-lg text-error">Pendaftaran Gagal</h3>
+          <p className="py-4">{status.message}</p>
           <div className="modal-action">
             <button className="btn" onClick={closeModal}>
               Tutup
@@ -345,4 +409,4 @@ const daftarReseller: React.FC = () => {
   );
 };
 
-export default daftarReseller;
+export default DaftarReseller;
