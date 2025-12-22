@@ -9,7 +9,6 @@ import DOMPurify from "dompurify";
 
 // --- 1. Definisi Tipe Data (Interface) ---
 
-// Interface untuk item di dalam array 'related'
 interface RelatedArticle {
   id: number;
   title: string;
@@ -17,25 +16,20 @@ interface RelatedArticle {
   thumbnail: string;
 }
 
-// Interface utama untuk Detail Artikel
 interface Article {
   id: number;
   title: string;
   slug: string;
   category: string;
   excerpt: string;
-  content: string; // Konten utama artikel (HTML)
+  content: string;
   thumbnail: string;
   status: "published" | "draft";
-  // ✨ PENAMBAHAN: Tipe untuk menampung data artikel terkait
   related: RelatedArticle[];
 }
 
 // --- 2. Komponen ArticleDetailPage ---
 const ArticleDetail: React.FC = () => {
-  // 💡 PERBAIKAN: useParams dari 'next/navigation' mengembalikan objek.
-  // Jika ini adalah App Router, params berisi { slug: string | string[] }.
-  // Kita asumsikan slug adalah string tunggal.
   const params = useParams();
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
 
@@ -43,17 +37,14 @@ const ArticleDetail: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const imageUrl = process.env.NEXT_PUBLIC_API_IMAGE_URL;
-  const apiUrl = process.env.NEXT_PUBLIC_API_PROD_DETAIL_URL;
+  // Menggunakan API URL dari env
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  // 💡 PERBAIKAN: Fungsi helper untuk membuat URL yang benar (gunakan path yang sesuai)
-  // Karena komponen ini berada di dalam komponen utama, kita definisikan helper di sini.
   const getArticleUrl = (articleSlug: string) => `/articles/${articleSlug}`;
 
   useEffect(() => {
-    // Memeriksa apakah slug valid sebelum memanggil API
     if (!slug) {
-      setError("❌ Slug artikel tidak ditemukan di URL. (Periksa URL Anda)");
+      setError("❌ Slug artikel tidak ditemukan di URL.");
       setLoading(false);
       return;
     }
@@ -61,22 +52,18 @@ const ArticleDetail: React.FC = () => {
     const fetchArticleDetail = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          `https://ts.crx.my.id/api/article/${slug}`
-        );
+        // Memanggil endpoint: https://cms.ternaksyams.co.id/api/article/{slug}
+        const response = await axios.get(`${apiUrl}/article/${slug}`);
 
-        // Asumsi struktur respons adalah { data: { data: ArticleObject } }
+        // Berdasarkan data Anda, struktur responsnya adalah { data: ArticleObject }
         setArticle(response.data.data);
         setError(null);
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          setError(
-            `Gagal memuat artikel: ${err.message}. Pastikan slug benar: ${slug}`
-          );
+          setError(`Gagal memuat artikel: ${err.message}`);
         } else {
           setError("Terjadi kesalahan tak terduga.");
         }
-        console.error("Error fetching article detail:", err);
         setArticle(null);
       } finally {
         setLoading(false);
@@ -84,20 +71,16 @@ const ArticleDetail: React.FC = () => {
     };
 
     fetchArticleDetail();
-  }, [slug]);
+  }, [slug, apiUrl]);
 
-  // Fungsi utilitas untuk merender konten HTML dengan aman
   const renderSafeHTML = (htmlContent: string) => {
-    // Tambahkan pengecekan null/undefined
     if (!htmlContent) return { __html: "" };
-
     const cleanHtml = DOMPurify.sanitize(htmlContent, {
       USE_PROFILES: { html: true },
     });
     return { __html: cleanHtml };
   };
 
-  // --- Rendering Conditional ---
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -117,18 +100,11 @@ const ArticleDetail: React.FC = () => {
         <h1 className="text-2xl font-bold mb-2">
           🚨 Error atau Artikel Tidak Ditemukan
         </h1>
-        <p>
-          {error ||
-            "Artikel yang Anda cari mungkin telah dihapus atau URL salah."}
-        </p>
-        <p className="mt-2 text-sm text-red-500">
-          Current Slug: **{slug || "Tidak ada slug"}**
-        </p>
+        <p>{error || "Artikel tidak ditemukan."}</p>
       </div>
     );
   }
 
-  // --- Konten Artikel ---
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 md:px-8 py-12">
@@ -136,6 +112,8 @@ const ArticleDetail: React.FC = () => {
         <div className="relative mb-10 overflow-hidden rounded-lg shadow-xl">
           <div className="h-64 sm:h-80 md:h-96 w-full bg-gray-200">
             <img
+              // ✨ PENYESUAIAN: Karena API sudah memberikan URL lengkap,
+              // langsung gunakan article.thumbnail tanpa tambahan base URL.
               src={article.thumbnail}
               alt={article.title}
               className="w-full h-full object-cover"
@@ -150,11 +128,9 @@ const ArticleDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Konten Utama dan Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* Kolom Kiri: Konten Artikel */}
           <div className="lg:col-span-2 bg-white p-6 md:p-10 rounded-lg shadow-lg">
-            {/* Bagikan (Share) - Dihilangkan untuk keringkasan */}
+            {/* Bagikan (Share) */}
             <div className="flex items-center space-x-2 text-gray-500 mb-6 border-b pb-4">
               <span className="font-semibold text-sm">Bagikan:</span>
               <button className="bg-blue-600 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-blue-700">
@@ -182,30 +158,28 @@ const ArticleDetail: React.FC = () => {
               <div dangerouslySetInnerHTML={renderSafeHTML(article.excerpt)} />
             </blockquote>
 
-            {/* Konten Utama Artikel (HTML dari API) */}
+            {/* Konten Utama Artikel */}
             <div
               className="prose max-w-none text-gray-800 leading-relaxed article-content"
               dangerouslySetInnerHTML={renderSafeHTML(article.content)}
             />
           </div>
 
-          {/* Kolom Kanan: Sidebar (Artikel Lainnya) */}
+          {/* Kolom Kanan: Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-10 bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">
                 Artikel Lainnya
               </h3>
               <ul className="space-y-3 text-sm text-gray-600">
-                {/* 🚀 LOGIC BARU: Lakukan mapping pada article.related */}
                 {article.related && article.related.length > 0 ? (
                   article.related.map((relatedArticle) => (
                     <li key={relatedArticle.id}>
                       <a
-                        // Gunakan slug dari relatedArticle untuk link
                         href={getArticleUrl(relatedArticle.slug)}
                         className="hover:text-green-600 transition-colors"
                       >
-                        {relatedArticle.title} {/* Tampilkan judul */}
+                        {relatedArticle.title}
                       </a>
                     </li>
                   ))
@@ -218,14 +192,13 @@ const ArticleDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* CSS Tambahan untuk Styling Konten HTML API */}
       <style>{`
         .article-content h1 {
-            font-size: 1.75rem; /* 28px */
+            font-size: 1.75rem;
             font-weight: 700;
             margin-top: 1.5rem;
             margin-bottom: 0.75rem;
-            color: #10B981; /* Tailwind Green-500 */
+            color: #10B981;
         }
         .article-content ul, .article-content ol {
             margin-left: 1.5rem;

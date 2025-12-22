@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
-
 import ImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
 
+// Redux & Toast
 import { useAppDispatch } from "@/redux/hooks";
 import { addItemToCart } from "@/redux/slices/cartSlice";
 import { toast } from "react-toastify";
 
 const ProductDetail = () => {
   const { slug } = useParams();
+  const dispatch = useAppDispatch();
+
   const [productDetail, setProductDetail] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
@@ -24,20 +26,12 @@ const ProductDetail = () => {
   const [selectedFlavourName, setSelectedFlavourName] = useState<string | null>(
     null
   );
-
-  // >>> KEMBALI ke string | null agar cocok dgn CartItem.sizeId
   const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
   const [selectedSizeName, setSelectedSizeName] = useState<string | null>(null);
-
-  // Simpan harga satuan efektif (price_discount ?? price)
   const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
-
-  const [cart, setCart] = useState<any[]>([]); // testing local
 
   const imageUrl = process.env.NEXT_PUBLIC_API_IMAGE_URL;
   const apiUrl = process.env.NEXT_PUBLIC_API_PROD_DETAIL_URL;
-
-  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const fetchProductDetail = async () => {
@@ -47,19 +41,31 @@ const ProductDetail = () => {
         setProductDetail(product);
 
         if (product.flavours.length > 0) {
-          const defaultFlavour = product.flavours.find(
-            (flavour: any) => flavour.id === product.flavour_id
-          );
+          const defaultFlavour =
+            product.flavours.find(
+              (flavour: any) => flavour.id === product.flavour_id
+            ) || product.flavours[0];
+
           if (defaultFlavour) {
             setSelectedFlavourId(defaultFlavour.id);
             setSelectedFlavourName(defaultFlavour.name);
+
+            // Inisialisasi size pertama dari flavour default
+            const firstVariant = product.variants.find(
+              (v: any) => v.flavour_id === defaultFlavour.id
+            );
+            if (firstVariant && firstVariant.sizes.length > 0) {
+              const firstSize = firstVariant.sizes[0];
+              setSelectedSizeId(String(firstSize.id));
+              setSelectedSizeName(firstSize.size);
+              setSelectedPrice(firstSize.price_discount ?? firstSize.price);
+            }
           }
         }
-
-        setLoading(false);
       } catch (error) {
-        console.error("Error fetching product detail:", error);
-        setError("Failed to fetch product detail");
+        console.error("Error:", error);
+        setError("Gagal memuat detail produk");
+      } finally {
         setLoading(false);
       }
     };
@@ -67,286 +73,291 @@ const ProductDetail = () => {
     if (slug) fetchProductDetail();
   }, [slug, apiUrl]);
 
-  // Filter variants berdasarkan flavour_id yang dipilih
-  const filteredVariants = productDetail
-    ? productDetail.variants.filter(
-        (variant: any) => variant.flavour_id === selectedFlavourId
-      )
-    : [];
+  // Memoisasi variant yang aktif
+  const activeVariant = useMemo(() => {
+    return productDetail?.variants.find(
+      (v: any) => v.flavour_id === selectedFlavourId
+    );
+  }, [productDetail, selectedFlavourId]);
 
-  // Images untuk gallery
-  const galleryImages =
-    filteredVariants.length > 0
-      ? filteredVariants[0]?.images.map((image: any) => ({
-          original: image.url,
-          thumbnail: image.url,
-        }))
+  // Memoisasi gambar gallery
+  const galleryImages = useMemo(() => {
+    if (activeVariant?.images && activeVariant.images.length > 0) {
+      return activeVariant.images.map((img: any) => ({
+        original: img.url,
+        thumbnail: img.url,
+      }));
+    }
+    return productDetail?.gizi_path
+      ? [
+          {
+            original: `${imageUrl}/${productDetail.gizi_path}`,
+            thumbnail: `${imageUrl}/${productDetail.gizi_path}`,
+          },
+        ]
       : [];
+  }, [activeVariant, productDetail, imageUrl]);
 
   const handleFlavourChange = (flavourId: number, flavourName: string) => {
     setSelectedFlavourId(flavourId);
     setSelectedFlavourName(flavourName);
 
-    // reset pilihan size & harga saat flavour berubah
-    setSelectedSizeId(null);
-    setSelectedSizeName(null);
-    setSelectedPrice(null);
+    // Auto-select size pertama dari flavour baru
+    const newVariant = productDetail.variants.find(
+      (v: any) => v.flavour_id === flavourId
+    );
+    if (newVariant && newVariant.sizes.length > 0) {
+      const firstSize = newVariant.sizes[0];
+      setSelectedSizeId(String(firstSize.id));
+      setSelectedSizeName(firstSize.size);
+      setSelectedPrice(firstSize.price_discount ?? firstSize.price);
+    }
   };
 
   const handleSizeChange = (sizeId: string, sizeName: string) => {
     setSelectedSizeId(sizeId);
     setSelectedSizeName(sizeName);
-
-    // Cari object size by id (bandingkan dengan String(size.id))
-    const selectedSize = filteredVariants[0]?.sizes.find(
-      (size: any) => String(size.id) === sizeId
+    const sizeObj = activeVariant?.sizes.find(
+      (s: any) => String(s.id) === sizeId
     );
-
-    if (selectedSize) {
-      const unitPrice =
-        selectedSize.price_discount ?? selectedSize.price ?? null;
-      setSelectedPrice(unitPrice);
+    if (sizeObj) {
+      setSelectedPrice(sizeObj.price_discount ?? sizeObj.price);
     }
   };
 
   const handleAddToCart = () => {
-    if (selectedFlavourId && selectedSizeId && selectedPrice !== null) {
-      const selectedVariant = filteredVariants.find(
-        (variant: any) => variant.flavour_id === selectedFlavourId
-      );
-
-      const selectedSize = selectedVariant?.sizes.find(
-        (size: any) => String(size.id) === selectedSizeId
-      );
-
-      if (selectedVariant && selectedSize) {
-        const quantity = 1;
-        const unitPrice =
-          selectedSize.price_discount ?? selectedSize.price ?? 0;
-
-        const itemToAdd = {
-          productName: selectedVariant.name,
-          flavourId: selectedFlavourId,
-          flavourName: selectedFlavourName,
-          sizeId: selectedSizeId, // string, sesuai CartItem
-          sizeName: selectedSizeName,
-          price: selectedSize.price, // harga normal
-          discount: selectedSize.discount, // diskon (sesuai server)
-          price_discount: selectedSize.price_discount, // harga setelah diskon (jika ada)
-          imageId: selectedVariant.images[0]?.id,
-          imageUrl: selectedVariant.images[0]?.url,
-          quantity,
-          total: unitPrice * quantity, // subtotal per item
-        };
-
-        dispatch(addItemToCart(itemToAdd));
-
-        const toastContent = (
-          <div>
-            {selectedVariant.name} - {selectedSizeName} berhasil ditambahkan ke
-            keranjang!
-            <br />
-            {/* Menggunakan Link langsung di dalam konten toast */}
-            <Link
-              href="/cart" // Ganti '/cart' dengan path keranjang Anda
-              className="underline text-secondary hover:text-primary font-bold leading-loose"
-              onClick={() => toast.dismiss()} // Opsional: tutup toast saat link diklik
-            >
-              Lihat Keranjang
-            </Link>
-          </div>
-        );
-
-        toast.success(
-          toastContent,
-          { autoClose: 3000 } // Naikkan autoClose agar user sempat mengklik
-        );
-      }
-    } else {
-      toast.warning("Silahkan pilih rasa dan ukuran.", { autoClose: 3000 });
-      console.log("Please select both flavour and size.");
+    if (!selectedFlavourId || !selectedSizeId || !activeVariant) {
+      toast.warning("Silahkan pilih rasa dan ukuran.");
+      return;
     }
-  };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-gray-50">
-        <div className="text-center">
-          <p className="text-xl text-green-700 font-semibold">
-            Memuat produk...
-          </p>
-          <div className="mt-4 w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        </div>
+    const currentSize = activeVariant.sizes.find(
+      (s: any) => String(s.id) === selectedSizeId
+    );
+
+    dispatch(
+      addItemToCart({
+        productName: activeVariant.name,
+        flavourId: selectedFlavourId,
+        flavourName: selectedFlavourName || "",
+        sizeId: selectedSizeId,
+        sizeName: `${selectedSizeName} gr`,
+        price: currentSize.price,
+        discount: currentSize.discount,
+        price_discount: currentSize.price_discount,
+        imageId: activeVariant.images[0]?.id || 0,
+        imageUrl: activeVariant.images[0]?.url || "",
+        quantity: 1,
+        total: selectedPrice || 0,
+      })
+    );
+
+    toast.success(
+      <div className="flex flex-col">
+        <span>Berhasil masuk keranjang!</span>
+        <Link
+          href="/cart"
+          className="text-emerald-600 font-bold underline mt-1"
+        >
+          Lihat Keranjang
+        </Link>
       </div>
     );
-  }
-  if (error) return <div>{error}</div>;
+  };
 
-  // Untuk tampilan harga di UI
-  const currentSize =
-    filteredVariants[0]?.sizes.find(
-      (s: any) => String(s.id) === selectedSizeId
-    ) ?? filteredVariants[0]?.sizes[0];
+  if (loading)
+    return (
+      <div className="text-center py-20 font-bold text-emerald-600 animate-pulse text-xl">
+        Memuat Produk...
+      </div>
+    );
+  if (error || !productDetail)
+    return (
+      <div className="text-center py-20 text-gray-500">
+        {error || "Produk tidak ditemukan"}
+      </div>
+    );
 
-  const hasDiscount =
-    (currentSize?.discount ?? 0) > 0 && currentSize?.price_discount;
-
-  const displayUnitPrice =
-    selectedPrice ?? currentSize?.price_discount ?? currentSize?.price ?? 0;
+  const activeSizeObj = activeVariant?.sizes.find(
+    (s: any) => String(s.id) === selectedSizeId
+  );
 
   return (
-    <div className="container mx-auto px-3 md:px-5 lg:px-10 my-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Gambar Produk */}
-        <div className="w-full">
-          <ImageGallery items={galleryImages} />
-        </div>
-
-        {/* Detail Produk */}
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-primary">
-            {filteredVariants[0]?.name}
-          </h1>
-
-          <div className="mt-2 md:mt-3 text-lg md:text-xl py-1 flex items-center">
-            {hasDiscount && (
-              <span className="line-through text-gray-400 pr-2">
-                Rp {Number(currentSize?.price ?? 0).toLocaleString()}
-              </span>
-            )}
-            <span className="text-gray-600 font-medium text-2xl">
-              Rp {Number(displayUnitPrice).toLocaleString()}
-            </span>
-            {hasDiscount && (
-              <span className="bg-accent text-white rounded-sm px-2 py-1 ml-3 text-sm font-semibold">
-                -{currentSize.discount}%
-              </span>
-            )}
+    <div className="bg-white min-h-screen pb-20">
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* BAGIAN KIRI: GALLERY */}
+          <div className="relative">
+            {/* {activeSizeObj?.discount > 0 && (
+              <div className="absolute top-4 left-4 z-10 bg-red-600 text-white font-black px-4 py-2 rounded-full shadow-lg animate-bounce">
+                SAVE {activeSizeObj.discount}%
+              </div>
+            )} */}
+            <ImageGallery
+              items={galleryImages}
+              showPlayButton={false}
+              thumbnailPosition="bottom"
+            />
           </div>
 
-          {/* Pilihan Rasa */}
-          <div className="my-4 md:my-6 border-t border-b border-gray-300 py-6">
-            <div className="flex flex-col">
-              <div className="flex justify-between space-x-2 mb-5">
-                <label className="font-bold">Rasa:</label>
-                <div className="flex space-x-2 text-right">
-                  {productDetail.flavours.map((flavour: any) => (
-                    <div key={flavour.id} className="flex items-center">
-                      <input
-                        type="radio"
-                        id={`flavour-${flavour.id}`}
-                        name="flavour"
-                        value={flavour.id}
-                        checked={selectedFlavourId === flavour.id}
-                        onChange={() =>
-                          handleFlavourChange(flavour.id, flavour.name)
-                        }
-                        className="hidden peer"
-                      />
-                      <label
-                        htmlFor={`flavour-${flavour.id}`}
-                        className="cursor-pointer px-4 py-2 text-gray-500 rounded-md border-2 border-primary peer-checked:bg-primary peer-checked:text-white hover:bg-zinc-300 transition duration-200"
-                      >
-                        {flavour.name}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {/* BAGIAN KANAN: INFO */}
+          <div className="space-y-8">
+            <div>
+              <p className="text-emerald-600 font-bold uppercase tracking-widest text-xs mb-1">
+                {productDetail.brand || "Premium Quality"}
+              </p>
+              <h1 className="text-4xl font-black text-slate-900 leading-tight">
+                {activeVariant?.name}
+              </h1>
 
-              {/* Pilihan Ukuran */}
-              <div className="flex justify-between space-x-2">
-                <label className="font-bold">Ukuran:</label>
-                <div className="flex space-x-2 justify-end">
-                  {filteredVariants[0]?.sizes.map((size: any) => (
-                    <div key={size.id} className="flex items-center">
-                      <input
-                        type="radio"
-                        id={`size-${size.id}`}
-                        name="size"
-                        value={size.size}
-                        checked={selectedSizeId === String(size.id)} // konsisten string
-                        onChange={() =>
-                          handleSizeChange(String(size.id), size.size)
-                        }
-                        className="hidden peer"
-                      />
-                      <label
-                        htmlFor={`size-${size.id}`}
-                        className="cursor-pointer px-4 py-2 text-gray-500 rounded-md border-2 border-primary peer-checked:bg-primary peer-checked:text-white hover:bg-zinc-300 transition duration-200"
-                      >
-                        {size.size} gr
-                      </label>
-                    </div>
-                  ))}
-                </div>
+              <div className="flex items-center gap-4 mt-6">
+                <span className="text-4xl font-black text-emerald-600">
+                  Rp {selectedPrice?.toLocaleString("id-ID")}
+                </span>
+                {activeSizeObj?.discount > 0 && (
+                  <>
+                    <span className="text-xl text-gray-400 line-through">
+                      Rp {activeSizeObj.price.toLocaleString("id-ID")}
+                    </span>
+                    <span className="bg-red-100 text-red-600 text-sm font-bold px-2 py-1 rounded">
+                      -{activeSizeObj.discount}%
+                    </span>
+                  </>
+                )}
               </div>
             </div>
-          </div>
 
-          {/* Button */}
-          <div className="py-4">
+            {/* PILIHAN RASA */}
+            <div className="space-y-4">
+              <p className="font-bold text-slate-800 flex items-center gap-2">
+                Pilih Rasa:{" "}
+                <span className="text-emerald-600 font-medium">
+                  {selectedFlavourName}
+                </span>
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {productDetail.flavours.map((f: any) => (
+                  <button
+                    key={f.id}
+                    onClick={() => handleFlavourChange(f.id, f.name)}
+                    className={`px-4 py-2 min-w-[100px] rounded-xl border-2 transition-all font-bold text-sm ${
+                      selectedFlavourId === f.id
+                        ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-md"
+                        : "border-gray-100 text-gray-400 hover:border-gray-300"
+                    }`}
+                  >
+                    {f.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* PILIHAN UKURAN */}
+            <div className="space-y-4">
+              <p className="font-bold text-slate-800">Pilih Ukuran:</p>
+              <div className="flex flex-wrap gap-3">
+                {activeVariant?.sizes.map((s: any) => (
+                  <button
+                    key={s.id}
+                    onClick={() => handleSizeChange(String(s.id), s.size)}
+                    className={`px-4 py-2 min-w-20 rounded-xl border-2 transition-all font-bold text-sm ${
+                      selectedSizeId === String(s.id)
+                        ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-md"
+                        : "border-gray-100 text-gray-400 hover:border-gray-300"
+                    }`}
+                  >
+                    {s.size} gr
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
               onClick={handleAddToCart}
-              className="cursor-pointer bg-primary text-white p-4 rounded-md w-full"
+              className="w-full bg-primary hover:bg-emerald-700 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-emerald-100 transition-all active:scale-95 flex justify-center items-center gap-3"
             >
-              Tambahkan ke Keranjang
+              TAMBAH KE KERANJANG
             </button>
           </div>
+        </div>
 
-          {/* Informasi Gizi */}
-          <div className="mt-6">
-            <h2 className="text-lg font-semibold mb-6">Informasi Nilai Gizi</h2>
+        {/* --- BAGIAN BAWAH: DESKRIPSI & GIZI --- */}
+        <div className="mt-20 border-t pt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="lg:col-span-2 space-y-12">
+            <section>
+              <h2 className="text-2xl font-black text-slate-900 mb-6 border-b-4 border-emerald-500 w-fit">
+                Deskripsi Produk
+              </h2>
+              <div
+                className="text-slate-600 leading-relaxed prose prose-emerald max-w-none"
+                dangerouslySetInnerHTML={{ __html: productDetail.description }}
+              />
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-black text-slate-900 mb-6 border-b-4 border-emerald-500 w-fit">
+                Manfaat Utama
+              </h2>
+              <div
+                className="text-slate-600 leading-relaxed prose prose-emerald max-w-none"
+                dangerouslySetInnerHTML={{ __html: productDetail.benefits }}
+              />
+            </section>
+          </div>
+
+          <div className="bg-slate-50 p-8 rounded-3xl h-fit border border-slate-100 sticky top-10">
+            <h2 className="text-xl font-black text-slate-900 mb-6 uppercase tracking-wider text-center">
+              Informasi Nilai Gizi
+            </h2>
             <img
               src={`${imageUrl}/${productDetail.gizi_path}`}
               alt="Informasi Gizi"
-              className="w-md h-auto rounded-lg shadow-lg"
+              className="w-full h-auto rounded-xl shadow-md hover:scale-[1.02] transition-transform duration-300"
             />
           </div>
         </div>
-      </div>
 
-      {/* Deskripsi & Manfaat */}
-      <div className="py-6">
-        <h2 className="text-lg font-semibold my-4 border-b border-gray-300 leading-loose">
-          Deskripsi
-        </h2>
-        <div dangerouslySetInnerHTML={{ __html: productDetail.description }} />
-
-        <h2 className="text-lg font-semibold my-4 border-b border-gray-300 leading-loose">
-          Manfaat
-        </h2>
-        <div dangerouslySetInnerHTML={{ __html: productDetail.benefits }} />
-      </div>
-
-      {/* Produk Terkait */}
-      <div className="mt-12">
-        <h2 className="text-xl font-semibold mb-4">Produk Terkait</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-          {productDetail.related_products &&
-          productDetail.related_products.length > 0 ? (
-            productDetail.related_products.map((relatedProduct: any) => (
-              <div key={relatedProduct.id} className="border rounded-lg p-4">
-                <img
-                  src={`${imageUrl}/${relatedProduct.image}`}
-                  alt={relatedProduct.product}
-                  className="w-full h-auto mb-4"
-                />
-                <h3 className="text-sm font-semibold">
-                  {relatedProduct.product}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Rp{" "}
-                  {Number(
-                    relatedProduct.price_discount ?? relatedProduct.price ?? 0
-                  ).toLocaleString()}
-                </p>
+        {/* --- RELATED PRODUCTS --- */}
+        {productDetail.related_products &&
+          productDetail.related_products.length > 0 && (
+            <div className="mt-24">
+              <h2 className="text-3xl font-black text-slate-900 mb-10">
+                Produk Terkait
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                {productDetail.related_products.map((item: any) => (
+                  <Link
+                    key={item.id}
+                    href={`/product/${item.slug || "#"}`}
+                    className="group"
+                  >
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100 group-hover:shadow-2xl group-hover:border-emerald-100 transition-all duration-300 h-full flex flex-col">
+                      <div className="aspect-square overflow-hidden rounded-xl mb-4 bg-gray-50">
+                        <img
+                          src={`${imageUrl}/${item.image}`}
+                          alt={item.product}
+                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      <h4 className="font-bold text-slate-800 line-clamp-2 group-hover:text-emerald-600 transition-colors">
+                        {item.product}
+                      </h4>
+                      <div className="mt-auto pt-3">
+                        <p className="text-emerald-600 font-black text-lg">
+                          Rp{" "}
+                          {(
+                            item.price_discount ??
+                            item.price ??
+                            0
+                          ).toLocaleString("id-ID")}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
               </div>
-            ))
-          ) : (
-            <p>Belum ada produk terkait.</p>
+            </div>
           )}
-        </div>
       </div>
     </div>
   );
