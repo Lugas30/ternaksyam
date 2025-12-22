@@ -101,10 +101,10 @@ const Checkout = () => {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
   // ... (Logika dan state lainnya tetap sama) ...
-  const totalWeight = cartItems.reduce(
-    (total, item: any) => total + item.sizeName,
-    0
-  );
+  const totalWeight = cartItems.reduce((total, item: any) => {
+    const weight = parseInt(item.sizeName); // ambil angka di depan
+    return total + weight;
+  }, 0);
 
   const totalHarga = cartItems.reduce(
     (total, item: any) => total + item.total,
