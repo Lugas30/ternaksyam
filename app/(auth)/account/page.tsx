@@ -55,9 +55,9 @@ function ProfileForm({ user }: { user: AuthUser }) {
       <h2 className="text-2xl md:text-[28px] font-bold text-gray-900">
         Profil Akun
       </h2>
-      <span className="block mt-2 text-sm text-gray-500">
+      {/* <span className="block mt-2 text-sm text-gray-500">
         User ID (Testing) : **{user.id}**
-      </span>
+      </span> */}
       <form className="mt-6 md:mt-8">
         <div className="grid grid-cols-1 gap-4 md:gap-5">
           <Input placeholder="Email" value={user.email} />

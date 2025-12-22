@@ -358,7 +358,9 @@ const OrderHistory: React.FC = () => {
   // --- Tampilan Loading, Error, dan Order Kosong ---
   if (isLoading) {
     return (
-      <p className="text-gray-600 p-4 text-center">Memuat riwayat pesanan...</p>
+      <div>
+        <p className="mt-4 text-gray-500">Memuat riwayat pesanan...</p>
+      </div>
     );
   }
 
@@ -373,13 +375,9 @@ const OrderHistory: React.FC = () => {
 
   if (orders.length === 0) {
     return (
-      <div className="p-10 border border-gray-200 bg-gray-50 rounded-xl text-center shadow-md">
-        <h3 className="text-xl font-bold text-gray-700">
-          Belum ada riwayat pesanan 😥
-        </h3>
-        <p className="mt-2 text-gray-500">
-          Ayo mulai berbelanja dan lihat riwayat Anda di sini!
-        </p>
+      <div className="p-10 border border-gray-200 bg-gray-50 rounded-xl shadow-md">
+        <h2 className="text-3xl font-bold text-gray-700">Order History</h2>
+        <p className="mt-2 text-gray-500">Belum ada riwayat pesanan.</p>
       </div>
     );
   }

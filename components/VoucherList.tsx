@@ -413,10 +413,9 @@ export default function VoucherList() {
 
   if (isLoading) {
     return (
-      <Placeholder
-        title="Memuat Voucher..."
-        subtitle="Sedang mengambil data voucher Anda dari server."
-      />
+      <div>
+        <p className="mt-4 text-gray-500">Memuat daftar voucher...</p>
+      </div>
     );
   }
   if (error) {
@@ -424,10 +423,10 @@ export default function VoucherList() {
   }
   if (vouchers.length === 0) {
     return (
-      <Placeholder
-        title="Voucher"
-        subtitle="Anda belum memiliki voucher aktif saat ini."
-      />
+      <div className="p-10 border border-gray-200 bg-gray-50 rounded-xl shadow-md">
+        <h2 className="text-3xl font-bold text-gray-700">Voucher</h2>
+        <p className="mt-2 text-gray-500">Belum ada voucher aktif saat ini.</p>
+      </div>
     );
   }
 

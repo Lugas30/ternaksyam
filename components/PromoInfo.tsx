@@ -121,10 +121,7 @@ export default function PromoInfo() {
   if (loading) {
     return (
       <div>
-        <h2 className="text-2xl md:text-[28px] font-bold text-gray-900">
-          Promo Info
-        </h2>
-        <p className="mt-4 text-gray-500">⏳ Memuat daftar promo...</p>
+        <p className="mt-4 text-gray-500">Memuat daftar promo...</p>
       </div>
     );
   }
@@ -148,13 +145,9 @@ export default function PromoInfo() {
   // --- UI Empty State ---
   if (activePromotions.length === 0) {
     return (
-      <div>
-        <h2 className="text-2xl md:text-[28px] font-bold text-gray-900">
-          Promo Info
-        </h2>
-        <p className="mt-4 text-gray-500">
-          Saat ini tidak ada promo aktif yang tersedia.
-        </p>
+      <div className="p-10 border border-gray-200 bg-gray-50 rounded-xl shadow-md">
+        <h2 className="text-3xl font-bold text-gray-700">Promo Info</h2>
+        <p className="mt-2 text-gray-500">Belum ada info promo tersedia.</p>
       </div>
     );
   }
