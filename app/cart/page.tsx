@@ -4,7 +4,6 @@ import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import {
   removeItemFromCart,
   updateItemQuantity,
-  setCartMeta,
 } from "@/redux/slices/cartSlice";
 
 import Link from "next/link";
@@ -13,10 +12,7 @@ import React, { useState } from "react";
 
 const Cart = () => {
   const cartItems = useAppSelector((state) => state.cart.cartItems);
-
-  // 🚨 PERUBAHAN UTAMA: Ambil user dari state.auth, bukan state.account
-  const user = useAppSelector((state) => state.auth.user); // Ambil objek user jika login
-
+  const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -47,18 +43,9 @@ const Cart = () => {
     0
   );
 
-  // === Kirim items ke API sesuai alur: tamu atau login ===
   const proceedCheckout = async (asGuest: boolean) => {
-    // 💡 Anda mungkin perlu menggunakan user.id di sini jika API /checkout memerlukannya
-    const userId = user?.id || null;
-
     try {
       setLoading(true);
-
-      // Catatan: Jika Anda perlu menyimpan ID pengguna ke Redux Cart Slice,
-      // Anda bisa menggunakan setCartMeta di sini:
-      // dispatch(setCartMeta({ userId: asGuest ? null : userId }));
-
       router.push("/checkout");
     } catch (err: any) {
       console.error(err);
@@ -70,17 +57,16 @@ const Cart = () => {
 
   const handleCheckout = async () => {
     if (!isAuthenticated) {
-      setShowModal(true); // tampilkan modal jika belum login
+      setShowModal(true);
       return;
     }
-    await proceedCheckout(false); // user login
+    await proceedCheckout(false);
   };
 
   return (
-    <div className="container mx-auto p-6">
-      {/* Render UI jika cart kosong */}
+    <div className="container mx-auto p-4 md:p-6">
       {cartItems.length === 0 ? (
-        <div className="text-center">
+        <div className="text-center py-20">
           <h1 className="text-2xl font-semibold mb-4">Keranjang Kosong</h1>
           <p className="text-gray-600 mb-8">
             Tidak ada produk dalam keranjang.
@@ -94,100 +80,87 @@ const Cart = () => {
         </div>
       ) : (
         <>
-          {/* Render tabel cart */}
-          <div className="overflow-x-auto shadow-md border border-gray-200 rounded-lg">
+          <h1 className="text-2xl font-bold mb-6">Keranjang Belanja</h1>
+
+          {/* --- DESKTOP VIEW: Table (Hidden on Mobile) --- */}
+          <div className="hidden md:block overflow-x-auto shadow-sm border border-gray-200 rounded-lg">
             <table className="min-w-full">
-              <thead>
-                <tr className="bg-gray-100 text-left">
-                  <th className="px-6 py-3 text-sm font-medium text-gray-900">
+              <thead className="bg-gray-50">
+                <tr className="text-left">
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-700">
                     PRODUK
                   </th>
-                  <th className="px-6 py-3 text-sm font-medium text-gray-900">
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-700">
                     HARGA
                   </th>
-                  <th className="px-6 py-3 text-sm font-medium text-gray-900">
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-700 text-center">
                     JUMLAH
                   </th>
-                  <th className="px-6 py-3 text-sm font-medium text-gray-900">
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-700">
                     TOTAL
                   </th>
-                  <th className="px-6 py-3 text-sm font-medium text-gray-900">
-                    HAPUS
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-700 text-right">
+                    AKSI
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-200">
                 {cartItems.map((item) => {
                   const unit = Number(item.price_discount ?? item.price);
                   return (
-                    <tr
-                      key={`${item.sizeId}-${item.flavourName}-${item.sizeName}`}
-                      className="border-t"
-                    >
+                    <tr key={item.sizeId}>
                       <td className="px-6 py-4">
                         <div className="flex items-center">
                           <img
                             src={item.imageUrl}
                             alt={item.productName}
-                            className="w-16 h-16 object-cover mr-4 rounded"
+                            className="w-16 h-16 object-cover rounded mr-4"
                           />
                           <div>
-                            <h3 className="font-semibold">
+                            <p className="font-semibold text-gray-900">
                               {item.productName}
-                            </h3>
-                            <p className="text-xs text-gray-500">
-                              {item.sizeName}
                             </p>
                             <p className="text-xs text-gray-500">
-                              {item.flavourName}
+                              {item.sizeName} | {item.flavourName}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {unit < Number(item.price) ? (
-                          <>
-                            <span className="line-through text-gray-400 pr-2">
-                              Rp {Number(item.price).toLocaleString()}
-                            </span>
-                            <span className="text-gray-600 font-medium">
-                              Rp {unit.toLocaleString()}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-gray-600 font-medium">
-                            Rp {Number(item.price).toLocaleString()}
-                          </span>
-                        )}
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-medium">
+                          Rp {unit.toLocaleString()}
+                        </p>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex justify-center items-center space-x-3">
                           <button
                             onClick={() =>
                               handleQuantityChange(item.sizeId, "decrease")
                             }
-                            className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300"
+                            className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200"
                           >
                             -
                           </button>
-                          <span>{item.quantity}</span>
+                          <span className="w-4 text-center">
+                            {item.quantity}
+                          </span>
                           <button
                             onClick={() =>
                               handleQuantityChange(item.sizeId, "increase")
                             }
-                            className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300"
+                            className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200"
                           >
                             +
                           </button>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
+                      <td className="px-6 py-4 font-semibold">
                         Rp {(unit * item.quantity).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => handleRemoveItem(item.sizeId)}
-                          className="text-red-500 hover:text-red-700"
+                          className="text-red-500 hover:underline text-sm font-medium"
                         >
                           Hapus
                         </button>
@@ -199,84 +172,162 @@ const Cart = () => {
             </table>
           </div>
 
-          {/* Subtotal */}
-          <div className="mt-6 flex justify-between items-center">
-            <div className="text-xl font-semibold">SUBTOTAL</div>
-            <div className="text-xl font-semibold">
-              Rp {Number(subTotal).toLocaleString()}
-            </div>
+          {/* --- MOBILE VIEW: Card List (Hidden on Desktop) --- */}
+          <div className="md:hidden space-y-4">
+            {cartItems.map((item) => {
+              const unit = Number(item.price_discount ?? item.price);
+              return (
+                <div
+                  key={item.sizeId}
+                  className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex gap-4"
+                >
+                  <img
+                    src={item.imageUrl}
+                    alt={item.productName}
+                    className="w-24 h-24 object-cover rounded-lg shrink-0"
+                  />
+                  <div className="flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-bold text-gray-900 leading-tight">
+                          {item.productName}
+                        </h3>
+                        <button
+                          onClick={() => handleRemoveItem(item.sizeId)}
+                          className="text-red-500 p-1"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {item.sizeName} • {item.flavourName}
+                      </p>
+                      <p className="text-sm font-bold text-primary mt-1">
+                        Rp {unit.toLocaleString()}
+                      </p>
+                    </div>
+
+                    <div className="flex justify-between items-end mt-2">
+                      <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg px-2">
+                        <button
+                          onClick={() =>
+                            handleQuantityChange(item.sizeId, "decrease")
+                          }
+                          className="w-8 h-8 text-xl text-gray-600"
+                        >
+                          -
+                        </button>
+                        <span className="px-3 font-medium text-sm">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() =>
+                            handleQuantityChange(item.sizeId, "increase")
+                          }
+                          className="w-8 h-8 text-xl text-gray-600"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <p className="font-bold text-gray-900">
+                        Total: Rp {(unit * item.quantity).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Tombol Checkout */}
-          <div className="mt-4 flex justify-between items-center">
-            <Link href="/shop" className="text-primary text-sm">
-              Lanjutkan Belanja
-            </Link>
-            <button
-              onClick={handleCheckout}
-              disabled={loading}
-              className="px-6 py-3 bg-primary text-white rounded-lg cursor-pointer disabled:opacity-60"
-            >
-              {loading ? "Memproses..." : "Checkout"}
-            </button>
+          {/* --- FOOTER: Summary & Actions --- */}
+          <div className="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+              <span className="text-lg font-medium text-gray-600">
+                Total Pembayaran
+              </span>
+              <span className="text-2xl font-bold text-primary">
+                Rp {subTotal.toLocaleString()}
+              </span>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4 items-center">
+              <Link
+                href="/shop"
+                className="w-full md:w-auto text-center order-2 md:order-1 text-gray-600 hover:text-primary font-medium text-sm"
+              >
+                ← Lanjutkan Belanja
+              </Link>
+              <button
+                onClick={handleCheckout}
+                disabled={loading}
+                className="w-full md:flex-1 md:max-w-xs ml-auto order-1 md:order-2 px-8 py-4 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-60"
+              >
+                {loading ? "Memproses..." : "Checkout Sekarang"}
+              </button>
+            </div>
           </div>
         </>
       )}
 
-      {/* Modal “Belum Masuk Akun” (Tidak ada perubahan yang diperlukan di sini) */}
+      {/* Modal remains the same but with responsive p-6 vs md:p-8 */}
       {showModal && (
         <div
-          className="fixed inset-0 z-999 flex items-center justify-center bg-black/50"
-          role="dialog"
-          aria-modal="true"
+          className="fixed inset-0 z-999 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
           onClick={() => setShowModal(false)}
         >
           <div
-            className="w-[92%] max-w-[560px] rounded-xl bg-white p-6 md:p-8 shadow-xl"
+            className="w-full max-w-[500px] rounded-2xl bg-white p-6 md:p-10 shadow-2xl overflow-hidden relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-[28px] md:text-[32px] leading-tight font-semibold text-[#0E5A45] mb-4">
-              Hai, Kamu Belum Masuk Akun
+            {/* Konten Modal Anda */}
+            <h2 className="text-2xl md:text-3xl font-bold text-[#0E5A45] mb-4 text-center">
+              Hai, Belum Masuk Akun?
             </h2>
-            <p className="text-[15px] md:text-[16px] text-gray-600 leading-relaxed mb-6">
-              Masuk akun untuk menikmati pengalaman personal dan mengakses semua
-              layanan kami.
+            <p className="text-gray-600 text-center mb-8">
+              Silakan masuk untuk mempermudah pelacakan pesanan Anda.
             </p>
-            <button
-              onClick={() => {
-                setShowModal(false);
-                router.push("/login?redirect=/checkout");
-              }}
-              className="w-full h-12 md:h-14 rounded-md bg-[#0E5A45] text-white text-[16px] md:text-[18px] font-semibold transition-colors hover:bg-[#0c4d3b] mb-2"
-            >
-              Masuk akun
-            </button>
-            <p className="text-center text-[13px] text-gray-600 mt-2 mb-3">
-              Belum punya akun ?
-            </p>
-            <button
-              onClick={() => {
-                setShowModal(false);
-                router.push("/register?redirect=/checkout");
-              }}
-              className="w-full h-12 md:h-14 rounded-md border border-[#0E5A45] text-[#0E5A45] text-[16px] md:text-[18px] font-semibold mb-3 hover:bg-green-50"
-            >
-              Daftarkan diri
-            </button>
-            <button
-              onClick={() => {
-                setShowModal(false);
-                proceedCheckout(true); // lanjut sebagai tamu (user_id = "")
-              }}
-              className="w-full h-12 md:h-14 rounded-md border border-[#0E5A45] text-[#0E5A45] text-[16px] md:text-[18px] font-semibold hover:bg-green-50"
-            >
-              Lanjut sebagai tamu
-            </button>
-            <div className="mt-6 rounded-md bg-[#FAFAF2] px-4 py-4 text-center">
-              <p className="text-[12.5px] text-gray-700">
-                "Dengan melanjutkan sebagai tamu, Anda tidak akan dapat melihat
-                riwayat pesanan atau mendapatkan keuntungan akun."
-              </p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  router.push("/login?redirect=/checkout");
+                }}
+                className="w-full py-4 bg-[#0E5A45] text-white rounded-xl font-bold"
+              >
+                Masuk Akun
+              </button>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  router.push("/register?redirect=/checkout");
+                }}
+                className="w-full py-4 border-2 border-[#0E5A45] text-[#0E5A45] rounded-xl font-bold"
+              >
+                Daftar Akun
+              </button>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  proceedCheckout(true);
+                }}
+                className="w-full py-4 text-gray-500 text-sm font-medium hover:underline"
+              >
+                Lanjut sebagai tamu
+              </button>
             </div>
           </div>
         </div>

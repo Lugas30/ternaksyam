@@ -50,15 +50,21 @@ const ProductDetail = () => {
             setSelectedFlavourId(defaultFlavour.id);
             setSelectedFlavourName(defaultFlavour.name);
 
-            // Inisialisasi size pertama dari flavour default
+            // Cari variant default
             const firstVariant = product.variants.find(
               (v: any) => v.flavour_id === defaultFlavour.id
             );
+
             if (firstVariant && firstVariant.sizes.length > 0) {
-              const firstSize = firstVariant.sizes[0];
-              setSelectedSizeId(String(firstSize.id));
-              setSelectedSizeName(firstSize.size);
-              setSelectedPrice(firstSize.price_discount ?? firstSize.price);
+              // URUTKAN UKURAN DARI TERKECIL (Sorting Logic)
+              const sortedSizes = [...firstVariant.sizes].sort(
+                (a, b) => a.size - b.size
+              );
+              const defaultSize = sortedSizes[0];
+
+              setSelectedSizeId(String(defaultSize.id));
+              setSelectedSizeName(defaultSize.size);
+              setSelectedPrice(defaultSize.price_discount ?? defaultSize.price);
             }
           }
         }
@@ -80,7 +86,12 @@ const ProductDetail = () => {
     );
   }, [productDetail, selectedFlavourId]);
 
-  // Memoisasi gambar gallery
+  // Urutkan ukuran yang tampil di UI (Sorting Logic)
+  const sortedSizes = useMemo(() => {
+    if (!activeVariant?.sizes) return [];
+    return [...activeVariant.sizes].sort((a, b) => a.size - b.size);
+  }, [activeVariant]);
+
   const galleryImages = useMemo(() => {
     if (activeVariant?.images && activeVariant.images.length > 0) {
       return activeVariant.images.map((img: any) => ({
@@ -102,12 +113,13 @@ const ProductDetail = () => {
     setSelectedFlavourId(flavourId);
     setSelectedFlavourName(flavourName);
 
-    // Auto-select size pertama dari flavour baru
     const newVariant = productDetail.variants.find(
       (v: any) => v.flavour_id === flavourId
     );
     if (newVariant && newVariant.sizes.length > 0) {
-      const firstSize = newVariant.sizes[0];
+      // Saat ganti rasa, otomatis pilih ukuran terkecil dari rasa tersebut
+      const sorted = [...newVariant.sizes].sort((a, b) => a.size - b.size);
+      const firstSize = sorted[0];
       setSelectedSizeId(String(firstSize.id));
       setSelectedSizeName(firstSize.size);
       setSelectedPrice(firstSize.price_discount ?? firstSize.price);
@@ -186,13 +198,8 @@ const ProductDetail = () => {
     <div className="bg-white min-h-screen pb-20">
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* BAGIAN KIRI: GALLERY */}
+          {/* GALLERY */}
           <div className="relative">
-            {/* {activeSizeObj?.discount > 0 && (
-              <div className="absolute top-4 left-4 z-10 bg-red-600 text-white font-black px-4 py-2 rounded-full shadow-lg animate-bounce">
-                SAVE {activeSizeObj.discount}%
-              </div>
-            )} */}
             <ImageGallery
               items={galleryImages}
               showPlayButton={false}
@@ -200,7 +207,7 @@ const ProductDetail = () => {
             />
           </div>
 
-          {/* BAGIAN KANAN: INFO */}
+          {/* INFO PRODUK */}
           <div className="space-y-8">
             <div>
               <p className="text-emerald-600 font-bold uppercase tracking-widest text-xs mb-1">
@@ -209,31 +216,28 @@ const ProductDetail = () => {
               <h1 className="text-4xl font-black text-slate-900 leading-tight">
                 {activeVariant?.name}
               </h1>
-
               <div className="flex items-center gap-4 mt-6">
                 <span className="text-4xl font-black text-emerald-600">
                   Rp {selectedPrice?.toLocaleString("id-ID")}
                 </span>
                 {activeSizeObj?.discount > 0 && (
-                  <>
+                  <div className="flex items-center gap-2">
                     <span className="text-xl text-gray-400 line-through">
                       Rp {activeSizeObj.price.toLocaleString("id-ID")}
                     </span>
                     <span className="bg-red-100 text-red-600 text-sm font-bold px-2 py-1 rounded">
                       -{activeSizeObj.discount}%
                     </span>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
 
             {/* PILIHAN RASA */}
             <div className="space-y-4">
-              <p className="font-bold text-slate-800 flex items-center gap-2">
+              <p className="font-bold text-slate-800">
                 Pilih Rasa:{" "}
-                <span className="text-emerald-600 font-medium">
-                  {selectedFlavourName}
-                </span>
+                <span className="text-emerald-600">{selectedFlavourName}</span>
               </p>
               <div className="flex flex-wrap gap-3">
                 {productDetail.flavours.map((f: any) => (
@@ -252,11 +256,11 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {/* PILIHAN UKURAN */}
+            {/* PILIHAN UKURAN (Sudah Terurut) */}
             <div className="space-y-4">
               <p className="font-bold text-slate-800">Pilih Ukuran:</p>
               <div className="flex flex-wrap gap-3">
-                {activeVariant?.sizes.map((s: any) => (
+                {sortedSizes.map((s: any) => (
                   <button
                     key={s.id}
                     onClick={() => handleSizeChange(String(s.id), s.size)}
@@ -274,14 +278,14 @@ const ProductDetail = () => {
 
             <button
               onClick={handleAddToCart}
-              className="w-full bg-primary hover:bg-emerald-700 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-emerald-100 transition-all active:scale-95 flex justify-center items-center gap-3"
+              className="w-full bg-primary hover:bg-emerald-700 text-white py-5 rounded-2xl font-black text-lg shadow-xl transition-all active:scale-95"
             >
               TAMBAH KE KERANJANG
             </button>
           </div>
         </div>
 
-        {/* --- BAGIAN BAWAH: DESKRIPSI & GIZI --- */}
+        {/* DESKRIPSI & MANFAAT */}
         <div className="mt-20 border-t pt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2 space-y-12">
             <section>
@@ -293,7 +297,6 @@ const ProductDetail = () => {
                 dangerouslySetInnerHTML={{ __html: productDetail.description }}
               />
             </section>
-
             <section>
               <h2 className="text-2xl font-black text-slate-900 mb-6 border-b-4 border-emerald-500 w-fit">
                 Manfaat Utama
@@ -305,6 +308,7 @@ const ProductDetail = () => {
             </section>
           </div>
 
+          {/* GIZI */}
           <div className="bg-slate-50 p-8 rounded-3xl h-fit border border-slate-100 sticky top-10">
             <h2 className="text-xl font-black text-slate-900 mb-6 uppercase tracking-wider text-center">
               Informasi Nilai Gizi
@@ -312,52 +316,54 @@ const ProductDetail = () => {
             <img
               src={`${imageUrl}/${productDetail.gizi_path}`}
               alt="Informasi Gizi"
-              className="w-full h-auto rounded-xl shadow-md hover:scale-[1.02] transition-transform duration-300"
+              className="w-full h-auto rounded-xl shadow-md"
             />
           </div>
         </div>
 
-        {/* --- RELATED PRODUCTS --- */}
-        {productDetail.related_products &&
-          productDetail.related_products.length > 0 && (
-            <div className="mt-24">
-              <h2 className="text-3xl font-black text-slate-900 mb-10">
-                Produk Terkait
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                {productDetail.related_products.map((item: any) => (
-                  <Link
-                    key={item.id}
-                    href={`/product/${item.slug || "#"}`}
-                    className="group"
-                  >
-                    <div className="bg-white p-5 rounded-2xl border border-gray-100 group-hover:shadow-2xl group-hover:border-emerald-100 transition-all duration-300 h-full flex flex-col">
-                      <div className="aspect-square overflow-hidden rounded-xl mb-4 bg-gray-50">
-                        <img
-                          src={`${imageUrl}/${item.image}`}
-                          alt={item.product}
-                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                        />
-                      </div>
-                      <h4 className="font-bold text-slate-800 line-clamp-2 group-hover:text-emerald-600 transition-colors">
-                        {item.product}
-                      </h4>
-                      <div className="mt-auto pt-3">
-                        <p className="text-emerald-600 font-black text-lg">
-                          Rp{" "}
-                          {(
-                            item.price_discount ??
-                            item.price ??
-                            0
-                          ).toLocaleString("id-ID")}
-                        </p>
-                      </div>
+        {/* RELATED PRODUCTS (Mapping Sesuai JSON) */}
+        {productDetail.related && productDetail.related.length > 0 && (
+          <div className="mt-24">
+            <h2 className="text-3xl font-black text-slate-900 mb-10">
+              Produk Terkait
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {productDetail.related.map((item: any) => (
+                <Link
+                  key={item.id}
+                  href={`/shop/${item.slug || "#"}`}
+                  className="group"
+                >
+                  <div className="bg-white p-5 rounded-2xl border border-gray-100 group-hover:shadow-2xl group-hover:border-emerald-100 transition-all duration-300 h-full flex flex-col">
+                    <div className="aspect-square overflow-hidden rounded-xl mb-4 bg-gray-50">
+                      <img
+                        src={`${imageUrl}/${item.image}`}
+                        alt={item.name}
+                        className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                      />
                     </div>
-                  </Link>
-                ))}
-              </div>
+                    <p className="text-[10px] font-bold text-emerald-600 mb-1 uppercase">
+                      {item.brand}
+                    </p>
+                    <h4 className="font-bold text-slate-800 line-clamp-2 group-hover:text-emerald-600 transition-colors">
+                      {item.name}
+                    </h4>
+                    <div className="mt-auto pt-3">
+                      <p className="text-emerald-600 font-black text-lg">
+                        Rp{" "}
+                        {(
+                          item.price_discount ??
+                          item.price ??
+                          0
+                        ).toLocaleString("id-ID")}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
-          )}
+          </div>
+        )}
       </div>
     </div>
   );

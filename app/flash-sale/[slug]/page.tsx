@@ -206,7 +206,7 @@ const ProductDetail = () => {
 
             <button
               onClick={handleAddToCart}
-              className="w-full bg-primary mt-4 hover:bg-[#008a69] text-white py-4 rounded-xl font-black text-lg shadow-xl shadow-emerald-100 transition-all active:scale-95"
+              className="w-full bg-primary mt-4 hover:bg-[#008a69] text-white py-5 rounded-xl font-black text-lg shadow-xl  transition-all active:scale-95"
             >
               TAMBAH KE KERANJANG
             </button>
