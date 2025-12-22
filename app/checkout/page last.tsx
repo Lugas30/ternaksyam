@@ -259,17 +259,8 @@ const Checkout = () => {
     }
   };
 
-  let discount = 0;
-
-  if (voucherData?.voucher_type === "shipping") {
-    // Diskon ongkir → tidak boleh melebihi biaya shipping
-    discount = Math.min(data.cost || 0, voucherData.discount_value || 0);
-  } else {
-    // Diskon normal → tidak dibatasi cost
-    discount = voucherData?.discount_value || 0;
-  }
-
-  const totalAkhir = totalHarga + data.cost - discount;
+  const totalAkhir =
+    totalHarga + data.cost - (voucherData?.discount_value || 0);
 
   // 🆕 FUNGSI VALIDASI FORMULIR BARU
   const isFormValid = () => {
@@ -819,11 +810,7 @@ const Checkout = () => {
             <div className="flex items-center gap-2 mt-6">
               <input
                 value={voucherCode}
-                onChange={(e) => {
-                  const val = e.target.value.toUpperCase();
-                  setVoucherCode(val);
-                  setData((prev) => ({ ...prev, voucher: val }));
-                }}
+                onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
                 placeholder="Voucher"
                 className="h-11 rounded-md border border-gray-300 px-3 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-green-600/40"
               />
@@ -857,16 +844,7 @@ const Checkout = () => {
               </div>
               <div className="flex justify-between text-green-700">
                 <span>Discount</span>
-                <span>
-                  {formatToIDR(
-                    voucherData?.voucher_type === "shipping"
-                      ? Math.min(
-                          data.cost || 0,
-                          voucherData?.discount_value || 0
-                        )
-                      : voucherData?.discount_value || 0
-                  )}
-                </span>
+                <span>{formatToIDR(voucherData?.discount_value || 0)}</span>
               </div>
               <p className="text-xs text-green-700">
                 {voucherData?.voucher_type
