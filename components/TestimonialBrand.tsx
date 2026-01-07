@@ -185,7 +185,7 @@ export default function TestimonialSection() {
   }, [emblaApi, onSelect]);
 
   return (
-    <section className="w-full bg-neutral bg-linear-to-b from-neutral to-[#187863]">
+    <section className="w-full bg-neutral bg-linear-to-b from-neutral to-[#187863] pb-20 md:pb-0">
       <div className="mx-auto max-w-[1200px] px-6 md:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[520px] items-center gap-12">
           {/* Kolom kiri: Info Testimonial */}
