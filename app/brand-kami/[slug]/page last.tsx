@@ -39,8 +39,6 @@ interface BrandData {
     ctaSubscribeURL: string;
     heroImageURL: string;
     imageAlt: string;
-    mainColor?: string;
-    accentColor?: string;
   };
   testimonial: { quote: string };
   reviews: {
@@ -49,7 +47,6 @@ interface BrandData {
     linkText: string;
     linkURL: string;
     reviewBgColor: string;
-    reviewTextColor?: string;
   };
   features: string[];
   marqueeBgColor?: string;
@@ -61,8 +58,6 @@ interface BrandData {
     description: string;
     ctaText: string;
     ctaURL: string;
-    cardColor: string;
-    textColor: string;
   };
   products: Product[];
   sliders: string[];
@@ -188,8 +183,6 @@ const BrandProfile: React.FC = () => {
               apiResponse.detail?.banner || apiResponse.image
             ),
             imageAlt: apiResponse.brand,
-            mainColor: apiResponse?.main_color || "",
-            accentColor: apiResponse?.accent_color || "",
           },
           testimonial: {
             quote: apiResponse.testimonial?.quotes.replace(/"/g, "") || "",
@@ -200,7 +193,6 @@ const BrandProfile: React.FC = () => {
             linkText: apiResponse.testimonial?.textcta || "Lihat ulasan",
             linkURL: apiResponse.testimonial?.linkcta || "#",
             reviewBgColor: apiResponse.testimonial?.cardcolor || "#193cb8",
-            reviewTextColor: apiResponse.testimonial?.textcolor || "#000000",
           },
           features: cleanHtmlAndSplit(
             apiResponse.feature?.features || "",
@@ -209,7 +201,7 @@ const BrandProfile: React.FC = () => {
           marqueeBgColor: apiResponse.feature?.marquebgcolor,
           marqueeTextColor: apiResponse.feature?.marquetextcolor,
           productSectionTitle: `Varian Produk ${apiResponse.brand}`,
-          accentTextColor: apiResponse.testimonial?.textcolor || "#000000",
+          accentTextColor: apiResponse.testimonial?.textcolor || "#193cb8",
           productSidebar: {
             headline: apiResponse.productsidebar?.headline || "",
             description:
@@ -218,8 +210,6 @@ const BrandProfile: React.FC = () => {
                 .trim() || "",
             ctaText: apiResponse.productsidebar?.ctatext || "Lihat Semua",
             ctaURL: apiResponse.productsidebar?.ctalink || "#",
-            cardColor: apiResponse.productsidebar?.cardcolor || "#193cb8",
-            textColor: apiResponse.productsidebar?.textcolor || "#000000",
           },
           products: (apiResponse.variants || []).map((v: any, i: number) => ({
             name: v.variant,
@@ -229,7 +219,7 @@ const BrandProfile: React.FC = () => {
             priceFrom: "Cek Harga",
             reviews: "1K reviews",
             linkText: "Beli Sekarang",
-            linkURL: `/shop`,
+            linkURL: `/${slug}/product/${v.id}`,
             isGoataProduct: true,
           })),
           sliders: (apiResponse.sliders || []).map((s: any) =>
@@ -306,15 +296,10 @@ const BrandProfile: React.FC = () => {
       >
         <div className="absolute inset-0 bg-white/30"></div>
         <div className="relative max-w-4xl mx-auto text-center py-16">
-          <h1
-            className="text-4xl md:text-5xl mb-4"
-            style={{ color: data.hero.mainColor }}
-          >
+          <h1 className="text-4xl md:text-5xl text-gray-900 mb-4">
             {data.hero.title}
           </h1>
-          <p className="text-xl mb-10" style={{ color: data.hero.accentColor }}>
-            {data.hero.subtitle}
-          </p>
+          <p className="text-xl text-gray-700 mb-10">{data.hero.subtitle}</p>
           <div className="flex justify-center space-x-4">
             <Link
               href={data.hero.ctaShopURL}
@@ -345,23 +330,16 @@ const BrandProfile: React.FC = () => {
             className="md:w-2/5 text-white p-6 rounded-lg shadow-xl text-center md:text-left"
             style={{ backgroundColor: data.reviews.reviewBgColor }}
           >
-            <p
-              className="text-xl md:text-2xl font-extrabold mb-1"
-              style={{ color: data.reviews.reviewTextColor }}
-            >
+            <p className="text-xl md:text-2xl font-extrabold mb-1">
               {data.reviews.count}
             </p>
-            <p
-              className="text-base md:text-xl font-light mb-2"
-              style={{ color: data.reviews.reviewTextColor }}
-            >
+            <p className="text-base md:text-xl font-light mb-2">
               {data.reviews.text}
             </p>
             <FiveStars />
             <Link
               href={data.reviews.linkURL}
               className="text-sm underline mt-3 inline-block hover:text-blue-200 transition duration-300"
-              style={{ color: data.reviews.reviewTextColor }}
             >
               {data.reviews.linkText}
             </Link>
@@ -374,7 +352,7 @@ const BrandProfile: React.FC = () => {
         className="overflow-hidden border-t border-b"
         style={{
           backgroundColor: data.marqueeBgColor || "#F1F1F1",
-          color: data.marqueeTextColor || "#000000",
+          color: data.marqueeTextColor || "#0a0a0a",
         }}
       >
         <Marquee speed={30} gradient={false} pauseOnHover={true}>
@@ -420,35 +398,21 @@ const BrandProfile: React.FC = () => {
         <div className={`max-w-7xl mx-auto ${sectionPaddingClass}`}>
           <h2
             className="text-3xl md:text-4xl font-semibold text-center mb-12"
-            style={{ color: data.hero.mainColor }}
+            style={{ color: data.accentTextColor }}
           >
             {data.productSectionTitle}
           </h2>
           <div className="flex flex-col lg:flex-row items-start">
-            <div
-              className="w-full lg:w-1/3 min-w-[300px] rounded-lg p-8 lg:mr-8 mb-8 lg:mb-0 h-full"
-              style={{ backgroundColor: data.productSidebar.cardColor }}
-            >
-              <h3
-                className="text-2xl font-semibold mb-6"
-                style={{ color: data.productSidebar.textColor }}
-              >
+            <div className="w-full lg:w-1/3 min-w-[300px] bg-blue-50 rounded-lg p-8 lg:mr-8 mb-8 lg:mb-0 h-full">
+              <h3 className="text-2xl font-semibold text-blue-900 mb-6">
                 {data.productSidebar.headline}
               </h3>
-              <p
-                className="mb-10"
-                style={{ color: data.productSidebar.textColor }}
-              >
+              <p className="text-gray-700 mb-10">
                 {data.productSidebar.description}
               </p>
               <Link
                 href={data.productSidebar.ctaURL}
-                className="flex items-center justify-center px-6 py-3 border text-sm font-medium rounded-full shadow-sm hover:opacity-80 transition duration-300"
-                style={{
-                  borderColor: data.productSidebar.textColor,
-                  color: data.productSidebar.cardColor,
-                  backgroundColor: data.productSidebar.textColor,
-                }}
+                className="flex items-center justify-center px-6 py-3 border border-blue-900 text-sm font-medium rounded-full shadow-sm text-blue-900 bg-white hover:bg-blue-100 transition duration-300"
               >
                 {data.productSidebar.ctaText} <span className="ml-2">→</span>
               </Link>
