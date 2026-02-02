@@ -52,7 +52,8 @@ const Register = () => {
     setError("");
     setIsLoading(true);
 
-    const apiUrl = "https://ts.crx.my.id/api/auth/register";
+    // MENGGUNAKAN URL DARI .ENV
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/register`;
 
     const registerData = {
       name: name,
