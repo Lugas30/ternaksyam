@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 
 interface AffiliateForm {
@@ -15,11 +15,6 @@ interface AffiliateForm {
   tiktok_account: string;
   lazada_account: string;
   agree: boolean;
-}
-
-interface ApiItem {
-  id: number;
-  name: string;
 }
 
 const DaftarAffiliate: React.FC = () => {
@@ -37,62 +32,16 @@ const DaftarAffiliate: React.FC = () => {
     agree: false,
   });
 
-  // State untuk data API
-  const [provinces, setProvinces] = useState<ApiItem[]>([]);
-  const [cities, setCities] = useState<ApiItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-
-  // Fetch data provinsi saat komponen dimuat
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const response = await axios.get(`${baseUrl}/provinces`);
-        setProvinces(response.data.data);
-      } catch (err) {
-        console.error("Gagal mengambil data provinsi", err);
-      }
-    };
-    fetchProvinces();
-  }, [baseUrl]);
-
-  // Fetch data kota berdasarkan ID provinsi
-  const fetchCities = async (provinceId: string) => {
-    if (!provinceId) return;
-    setLoadingCities(true);
-    try {
-      const response = await axios.get(`${baseUrl}/cities/${provinceId}`);
-      setCities(response.data.data);
-    } catch (err) {
-      console.error("Gagal mengambil data kota", err);
-    } finally {
-      setLoadingCities(false);
-    }
-  };
-
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
-
-    if (name === "province") {
-      // Cari nama provinsi berdasarkan ID untuk disimpan di formData
-      const selectedProvince = provinces.find((p) => p.id.toString() === value);
-      setFormData((prev) => ({
-        ...prev,
-        province: selectedProvince ? selectedProvince.name : "",
-        city: "", // Reset kota jika provinsi berubah
-      }));
-      setCities([]); // Reset daftar kota
-      fetchCities(value); // Ambil kota berdasarkan ID
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    const { name, value } = e.currentTarget;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,10 +60,33 @@ const DaftarAffiliate: React.FC = () => {
     setErrorOpen(false);
 
     try {
-      // Mengirimkan formData yang sudah berisi nama provinsi dan nama kota (string)
+      const {
+        name,
+        whatsapp,
+        email,
+        province,
+        city,
+        sosmed_account,
+        shopee_account,
+        tokopedia_account,
+        tiktok_account,
+        lazada_account,
+      } = formData;
+
       const { data }: { data: any } = await axios.post(
-        `${baseUrl}/affiliate/register`,
-        formData,
+        "https://ts.crx.my.id/api/affiliate/register",
+        {
+          name,
+          whatsapp,
+          email,
+          province,
+          city,
+          sosmed_account,
+          shopee_account,
+          tokopedia_account,
+          tiktok_account,
+          lazada_account,
+        }
       );
 
       if (data?.message === "Affiliate created successfully") {
@@ -132,7 +104,6 @@ const DaftarAffiliate: React.FC = () => {
           lazada_account: "",
           agree: false,
         });
-        setCities([]);
       } else {
         setErrorMsg(data?.message || "Pendaftaran gagal. Coba lagi.");
         setErrorOpen(true);
@@ -191,51 +162,32 @@ const DaftarAffiliate: React.FC = () => {
                   required
                 />
               </div>
-
-              {/* Dropdown Provinsi */}
               <div className="grid grid-cols-2 gap-2">
-                <select
+                <input
+                  type="text"
                   name="province"
-                  className="select select-bordered w-full font-normal"
+                  placeholder="Provinsi"
+                  className="input input-bordered w-full"
+                  value={formData.province}
                   onChange={handleChange}
                   required
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Pilih Provinsi
-                  </option>
-                  {provinces.map((prov) => (
-                    <option key={prov.id} value={prov.id}>
-                      {prov.name}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Dropdown Kota */}
-                <select
+                />
+                <input
+                  type="text"
                   name="city"
-                  className="select select-bordered w-full font-normal"
+                  placeholder="Kota"
+                  className="input input-bordered w-full"
                   value={formData.city}
                   onChange={handleChange}
                   required
-                  disabled={cities.length === 0 || loadingCities}
-                >
-                  <option value="">
-                    {loadingCities ? "Loading..." : "Pilih Kota"}
-                  </option>
-                  {cities.map((city) => (
-                    <option key={city.id} value={city.name}>
-                      {city.name}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <p className="font-semibold text-sm text-base-content/80 mt-2">
                 Username Akun Media Sosial
               </p>
               <div className="flex gap-2">
-                <img src="/images/medsos/instagram.svg" alt="Instagram" />
+                <img src="/images/medsos/instagram.svg" alt="Instagram"></img>
                 <input
                   type="text"
                   name="sosmed_account"
@@ -251,7 +203,7 @@ const DaftarAffiliate: React.FC = () => {
                 Username Akun Affiliate
               </p>
               <div className="flex gap-2">
-                <img src="/images/medsos/shopee.svg" alt="shopee" />
+                <img src="/images/medsos/shopee.svg" alt="shopee"></img>
                 <input
                   type="text"
                   name="shopee_account"
@@ -262,7 +214,7 @@ const DaftarAffiliate: React.FC = () => {
                 />
               </div>
               <div className="flex gap-2">
-                <img src="/images/medsos/tokopedia.svg" alt="tokopedia" />
+                <img src="/images/medsos/tokopedia.svg" alt="tokopedia"></img>
                 <input
                   type="text"
                   name="tokopedia_account"
@@ -273,7 +225,7 @@ const DaftarAffiliate: React.FC = () => {
                 />
               </div>
               <div className="flex gap-2">
-                <img src="/images/medsos/tiktok.svg" alt="tiktok" />
+                <img src="/images/medsos/tiktok.svg" alt="tiktok"></img>
                 <input
                   type="text"
                   name="tiktok_account"
@@ -284,7 +236,7 @@ const DaftarAffiliate: React.FC = () => {
                 />
               </div>
               <div className="flex gap-2">
-                <img src="/images/medsos/lazada.svg" alt="lazada" />
+                <img src="/images/medsos/lazada.svg" alt="lazada"></img>
                 <input
                   type="text"
                   name="lazada_account"

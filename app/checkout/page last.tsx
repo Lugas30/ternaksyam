@@ -92,6 +92,7 @@ const Checkout = () => {
   const [province, setProvince] = useState([]);
   const [cities, setCities] = useState([]);
   const [districts, setDistricts] = useState([]);
+  const [subdistricts, setSubdistricts] = useState([]);
   const [voucherCode, setVoucherCode] = useState("");
   const [voucherData, setVoucherData] = useState<any>(null);
   const [layanan, setLayanan] = useState([]);
@@ -108,7 +109,7 @@ const Checkout = () => {
 
   const totalHarga = cartItems.reduce(
     (total, item: any) => total + item.total,
-    0
+    0,
   );
 
   const kurir = [
@@ -125,6 +126,8 @@ const Checkout = () => {
     address: "",
     district: "",
     district_name: "",
+    subdistrict: "",
+    subdistrict_name: "",
     city: "",
     city_name: "",
     province: "",
@@ -135,6 +138,8 @@ const Checkout = () => {
     cost: 0,
     service: "",
     etd: "",
+    shipping_cashback: "",
+    grandtotal: "",
   });
 
   const router = useRouter();
@@ -145,7 +150,7 @@ const Checkout = () => {
     const fetchProvinces = async () => {
       try {
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/provinces`
+          `${process.env.NEXT_PUBLIC_API_URL}/provinces`,
         );
         setProvince(response.data.data);
       } catch (error) {
@@ -162,7 +167,7 @@ const Checkout = () => {
       if (!data.province) return; // stop kalau belum pilih provinsi
       try {
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/cities/${data.province}`
+          `${process.env.NEXT_PUBLIC_API_URL}/cities/${data.province}`,
         );
         setCities(response.data.data);
       } catch (error) {
@@ -179,7 +184,7 @@ const Checkout = () => {
       if (!data.city) return; // stop kalau belum pilih kota
       try {
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/districts/${data.city}`
+          `${process.env.NEXT_PUBLIC_API_URL}/districts/${data.city}`,
         );
         setDistricts(response.data.data);
       } catch (error) {
@@ -190,42 +195,67 @@ const Checkout = () => {
     fetchDistricts();
   }, [data.city]);
 
-  // handle layanan kurir
+  // ✅ Ambil daftar kelurahan setiap kali kecamatan berubah
   useEffect(() => {
-    const fetchLayanan = async () => {
-      if (!data.kurir || !data.district || totalWeight === 0) return;
+    const fetchSubdistricts = async () => {
+      if (!data.district) return; // stop kalau belum pilih kecamatan
       try {
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/cost/${data.district}/${totalWeight}/${data.kurir}`
+          `${process.env.NEXT_PUBLIC_API_URL}/subdistricts/${data.district}`,
         );
+        setSubdistricts(response.data.data);
+      } catch (error) {
+        console.error("Error fetching subdistricts:", error);
+      }
+    };
+
+    fetchSubdistricts();
+  }, [data.district]);
+
+  // ✅ Ambil layanan setiap kali kurir, berat, dan harga barang berubah
+  useEffect(() => {
+    const fetchLayanan = async () => {
+      if (
+        !data.kurir ||
+        !data.subdistrict ||
+        totalWeight === 0 ||
+        totalHarga === 0
+      )
+        return;
+
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/cost`,
+          {
+            params: {
+              destination: data.subdistrict, // Komship destination ID
+              weight: totalWeight, // gram
+              total_price: totalHarga, // harga barang
+              courier: data.kurir, // ninja, jne, dll
+            },
+          },
+        );
+
         setLayanan(response.data.data);
       } catch (error) {
         console.error("Error fetching layanan:", error);
-        setLayanan([]); // Kosongkan layanan jika gagal
+        setLayanan([]);
         toast.error("Gagal mengambil layanan kurir. Pilih kurir lain.");
       }
     };
 
     fetchLayanan();
-    // Reset cost dan service jika kurir/district berubah
+
+    // reset cost & service kalau berubah
     setData((prev) => ({
       ...prev,
       cost: 0,
       service: "",
       etd: "",
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.district, data.kurir, totalWeight]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-  ) => {
-    const { name, value } = e.target;
-    setData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.district, data.kurir, totalWeight, totalHarga]);
 
   // handle apply voucher
   const handleApplyVoucher = async () => {
@@ -242,7 +272,7 @@ const Checkout = () => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       const data = response.data.data;
@@ -259,8 +289,17 @@ const Checkout = () => {
     }
   };
 
-  const totalAkhir =
-    totalHarga + data.cost - (voucherData?.discount_value || 0);
+  let discount = 0;
+
+  if (voucherData?.voucher_type === "shipping") {
+    // Diskon ongkir → tidak boleh melebihi biaya shipping
+    discount = Math.min(data.cost || 0, voucherData.discount_value || 0);
+  } else {
+    // Diskon normal → tidak dibatasi cost
+    discount = voucherData?.discount_value || 0;
+  }
+
+  const totalAkhir = totalHarga + data.cost - discount;
 
   // 🆕 FUNGSI VALIDASI FORMULIR BARU
   const isFormValid = () => {
@@ -324,7 +363,7 @@ const Checkout = () => {
             session: sessionToken,
             qty: item.quantity,
           },
-          { headers: { "Content-Type": "application/json" } }
+          { headers: { "Content-Type": "application/json" } },
         );
 
         if (!cartId) cartId = response.data.data.cart_id;
@@ -340,23 +379,24 @@ const Checkout = () => {
         province: data.province_name,
         city: data.city_name,
         district: data.district_name,
-        destination_id: data.district,
+        destination_id: data.subdistrict,
         postal_code: data.postalCode || user?.postalCode,
         phone: data.phone || user?.whatsapp,
         courier: data.kurir,
         service: data.service,
         cost: data.cost,
-        etd: data.etd || "2-3 Hari",
+        etd: data.etd,
         total: totalAkhir,
         note: "",
         total_weight: totalWeight,
+        shipping_cashback: data?.shipping_cashback,
       };
 
       // 3️⃣ Kirim ke API /transaction
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/transaction`,
         payload,
-        { headers: { "Content-Type": "application/json" } }
+        { headers: { "Content-Type": "application/json" } },
       );
 
       console.log("📦 Response transaksi:", response.data);
@@ -375,16 +415,16 @@ const Checkout = () => {
             dispatch(clearCart());
             toast.success("Pembayaran berhasil! 🎉");
             router.push(
-              `/thankyou?invoice=${invoiceNumber}&email=${userEmail}`
+              `/thankyou?invoice=${invoiceNumber}&email=${userEmail}`,
             );
           },
           onPending: function (result: any) {
             dispatch(clearCart());
             toast.info(
-              "Pembayaran masih pending. Silakan selesaikan di Midtrans."
+              "Pembayaran masih pending. Silakan selesaikan di Midtrans.",
             );
             router.push(
-              `/thankyou?invoice=${invoiceNumber}&email=${userEmail}`
+              `/thankyou?invoice=${invoiceNumber}&email=${userEmail}`,
             );
           },
           onError: function (result: any) {
@@ -502,6 +542,33 @@ const Checkout = () => {
     }));
   };
 
+  // 🆕 HANDLER PERUBAHAN SUBDISTRICT BARU (Lebih Bersih)
+  const handleSubdistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value === "") {
+      setData((prev) => ({
+        ...prev,
+        subdistrict: "",
+        subdistrict_name: "",
+        kurir: "",
+        cost: 0,
+        service: "",
+        etd: "",
+      }));
+      return;
+    }
+    const selected = JSON.parse(e.target.value);
+    setData((prev) => ({
+      ...prev,
+      subdistrict: selected.id,
+      subdistrict_name: selected.name,
+      // Reset state di bawahnya secara konsisten saat subdistrict berubah
+      kurir: "",
+      cost: 0,
+      service: "",
+      etd: "",
+    }));
+  };
+
   // 🆕 HANDLER PERUBAHAN KURIR BARU (Lebih Bersih)
   const handleKurirChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     // Reset layanan saat kurir berubah
@@ -523,6 +590,8 @@ const Checkout = () => {
         cost: 0,
         service: "",
         etd: "",
+        shipping_cashback: "",
+        grandtotal: "",
       }));
       return;
     }
@@ -532,6 +601,8 @@ const Checkout = () => {
       cost: selected.cost,
       service: selected.service,
       etd: selected.etd,
+      shipping_cashback: selected.shipping_cashback,
+      grandtotal: selected.grandtotal,
     }));
   };
 
@@ -666,6 +737,35 @@ const Checkout = () => {
                 ))}
               </select>
 
+              <select
+                name="subdistrict"
+                value={
+                  data.subdistrict
+                    ? JSON.stringify({
+                        id: data.subdistrict,
+                        name: data.subdistrict_name,
+                      })
+                    : ""
+                }
+                onChange={handleSubdistrictChange} // 🆕 Menggunakan handler baru
+                disabled={!subdistricts.length}
+                className="h-11 rounded-md border border-gray-300 px-3 text-sm w-full focus:outline-none focus:ring-2 focus:ring-green-600/40"
+              >
+                <option value="">- Pilih Kelurahan -</option>
+                {subdistricts.map((subdistrict: any) => (
+                  <option
+                    key={subdistrict.id}
+                    value={JSON.stringify({
+                      id: subdistrict.id,
+                      name: subdistrict.name,
+                    })}
+                  >
+                    {subdistrict.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <input
                 type="text"
                 placeholder="Kode Pos"
@@ -675,8 +775,6 @@ const Checkout = () => {
                 }}
                 className="h-11 rounded-md border border-gray-300 px-3 text-sm w-full focus:outline-none focus:ring-2 focus:ring-green-600/40"
               />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <input
                 type="text"
                 placeholder="No Whatsapp"
@@ -686,6 +784,8 @@ const Checkout = () => {
                 }}
                 className="h-11 rounded-md border border-gray-300 px-3 text-sm w-full focus:outline-none focus:ring-2 focus:ring-green-600/40"
               />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <select
                 name="kurir"
                 value={data.kurir}
@@ -699,42 +799,47 @@ const Checkout = () => {
                   </option>
                 ))}
               </select>
-            </div>
 
-            {/* LAYANAN KURIR */}
-            <select
-              name="cost"
-              className="h-11 rounded-md border border-gray-300 px-3 text-sm w-full focus:outline-none focus:ring-2 focus:ring-green-600/40"
-              value={
-                data.service
-                  ? JSON.stringify({
-                      cost: data.cost,
-                      service: data.service,
-                      etd: data.etd,
-                    })
-                  : ""
-              }
-              onChange={handleServiceChange} // 🆕 Menggunakan handler baru
-              disabled={layanan.length === 0}
-            >
-              <option value="">
-                - Pilih Layanan{" "}
-                {layanan.length === 0 ? "(Kurir/Alamat Belum Lengkap)" : ""} -
-              </option>
-
-              {layanan.map((item: any, index) => (
-                <option
-                  key={index}
-                  value={JSON.stringify({
-                    cost: item.cost,
-                    service: item.service,
-                    etd: item.etd,
-                  })}
-                >
-                  {item.service} - {formatToIDR(item.cost)} ({item.etd} hari)
+              {/* LAYANAN KURIR */}
+              <select
+                name="cost"
+                className="h-11 rounded-md border border-gray-300 px-3 text-sm w-full focus:outline-none focus:ring-2 focus:ring-green-600/40"
+                value={
+                  data.service
+                    ? JSON.stringify({
+                        cost: data.cost,
+                        service: data.service,
+                        etd: data.etd,
+                        shipping_cashback: data.shipping_cashback,
+                        grandtotal: data.grandtotal,
+                      })
+                    : ""
+                }
+                onChange={handleServiceChange} // 🆕 Menggunakan handler baru
+                disabled={layanan.length === 0}
+              >
+                <option value="">
+                  - Pilih Layanan{" "}
+                  {layanan.length === 0 ? "(Kurir/Alamat Belum Lengkap)" : ""} -
                 </option>
-              ))}
-            </select>
+
+                {layanan.map((item: any, index) => (
+                  <option
+                    key={index}
+                    value={JSON.stringify({
+                      cost: item.shipping_cost,
+                      service: item.service_name,
+                      etd: item.etd,
+                      shipping_cashback: item.shipping_cashback,
+                      grandtotal: item.grandtotal,
+                    })}
+                  >
+                    {item.service_name} - {formatToIDR(item.shipping_cost)} (
+                    {item.etd} hari)
+                  </option>
+                ))}
+              </select>
+            </div>
           </section>
 
           {/* Pembayaran */}
@@ -747,7 +852,9 @@ const Checkout = () => {
             </p>
             <div className="border rounded-lg overflow-hidden mb-6">
               <div className="px-4 py-3 flex justify-between items-center bg-gray-50 border-b">
-                <span className="text-sm font-medium">Payments By Xendit</span>
+                <span className="text-sm font-medium">
+                  Payments By Midtrans
+                </span>
                 <div className="flex gap-2">
                   <span className="border px-2 py-1 text-xs rounded">VISA</span>
                   <span className="border px-2 py-1 text-xs rounded">
@@ -810,7 +917,11 @@ const Checkout = () => {
             <div className="flex items-center gap-2 mt-6">
               <input
                 value={voucherCode}
-                onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  const val = e.target.value.toUpperCase();
+                  setVoucherCode(val);
+                  setData((prev) => ({ ...prev, voucher: val }));
+                }}
                 placeholder="Voucher"
                 className="h-11 rounded-md border border-gray-300 px-3 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-green-600/40"
               />
@@ -844,7 +955,16 @@ const Checkout = () => {
               </div>
               <div className="flex justify-between text-green-700">
                 <span>Discount</span>
-                <span>{formatToIDR(voucherData?.discount_value || 0)}</span>
+                <span>
+                  {formatToIDR(
+                    voucherData?.voucher_type === "shipping"
+                      ? Math.min(
+                          data.cost || 0,
+                          voucherData?.discount_value || 0,
+                        )
+                      : voucherData?.discount_value || 0,
+                  )}
+                </span>
               </div>
               <p className="text-xs text-green-700">
                 {voucherData?.voucher_type

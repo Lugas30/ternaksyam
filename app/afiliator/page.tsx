@@ -24,7 +24,21 @@ interface FaqItem {
   category: { name: string };
 }
 
+// Tambahkan Interface Testimonial
+interface Testimonial {
+  id: number;
+  name: string;
+  social_media: string;
+  city_age: string;
+  message: string;
+  image: string;
+  target: string;
+  status: boolean;
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// URL dasar untuk gambar dari Laravel storage (sesuaikan jika berbeda)
+const STORAGE_URL = "https://cms.ternaksyams.co.id/storage";
 
 const Afiliator = () => {
   const [benefits, setBenefits] = useState<benefit[]>([]);
@@ -34,22 +48,37 @@ const Afiliator = () => {
   const [faqData, setFaqData] = useState<FaqItem[]>([]);
   const [loadingFaq, setLoadingFaq] = useState(true);
 
+  // State baru untuk Testimonial
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loadingTesti, setLoadingTesti] = useState(true);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [resBenefit, resFaq] = await Promise.all([
+        const [resBenefit, resFaq, resTesti] = await Promise.all([
           axios.get(`${API_URL}/benefit/affiliates`),
           axios.get(`${API_URL}/faqs`),
+          axios.get(`${API_URL}/testimonials`), // Hit API Testimonials
         ]);
+
         setBenefits(resBenefit.data.data || []);
+
         setFaqData(
-          resFaq.data.filter((item: FaqItem) => item.target === "affiliate")
+          resFaq.data.filter((item: FaqItem) => item.target === "affiliate"),
+        );
+
+        // Filter Testimonial dengan target affiliate
+        setTestimonials(
+          resTesti.data.filter(
+            (item: Testimonial) => item.target === "affiliate" && item.status,
+          ),
         );
       } catch (err) {
         setError("Gagal memuat data.");
       } finally {
         setLoading(false);
         setLoadingFaq(false);
+        setLoadingTesti(false);
       }
     };
     fetchData();
@@ -75,22 +104,32 @@ const Afiliator = () => {
     text,
     name,
     handle,
+    image,
   }: {
     text: string;
     name: string;
     handle: string;
+    image: string;
   }) => (
-    <div className="bg-white p-8 rounded-4xl shadow-sm border border-gray-100 relative">
+    <div className="bg-white p-8 rounded-4xl shadow-sm border border-gray-100 relative h-full flex flex-col">
       <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-100 rounded-bl-4xl flex items-center justify-center">
         <img src="/images/kutip.svg" className="w-6 h-6 invert" alt="quote" />
       </div>
-      <p className="text-gray-600 italic mb-8 mt-4 leading-relaxed">"{text}"</p>
+      {/* Menggunakan dangerouslySetInnerHTML karena API mengirim string HTML */}
+      <div
+        className="text-gray-600 italic mb-8 mt-4 leading-relaxed grow"
+        dangerouslySetInnerHTML={{ __html: `"${text}"` }}
+      />
       <div className="flex items-center gap-4">
         <div className="avatar">
           <div className="w-12 rounded-full ring ring-emerald-100">
             <img
-              src="https://img.daisyui.com/images/profile/demo/yellingcat@192.webp"
-              alt="avatar"
+              src={image.startsWith("http") ? image : `${STORAGE_URL}/${image}`}
+              alt={name}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src =
+                  "https://img.daisyui.com/images/profile/demo/yellingcat@192.webp";
+              }}
             />
           </div>
         </div>
@@ -218,21 +257,21 @@ const Afiliator = () => {
             Kisah Sukses Affiliate
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <TestimonialCard
-              text="Berkat ngonten affiliates aku berhasil beli iPhone 13 Pro Max buat menunjang konten dan renovasi kamar."
-              name="Siti Rahma"
-              handle="@sitirhma_"
-            />
-            <TestimonialCard
-              text="Awalnya iseng share link, ternyata komisinya bisa buat bayar cicilan motor. Sangat membantu!"
-              name="Budi Santoso"
-              handle="@budis_aff"
-            />
-            <TestimonialCard
-              text="Pelatihannya sangat detail, dari nol sampai bisa dapet jutaan per minggu. Recommended banget!"
-              name="Andini Putri"
-              handle="@andinip"
-            />
+            {loadingTesti ? (
+              <div className="col-span-full flex justify-center">
+                <span className="loading loading-dots loading-lg text-emerald-500"></span>
+              </div>
+            ) : (
+              testimonials.map((testi) => (
+                <TestimonialCard
+                  key={testi.id}
+                  text={testi.message}
+                  name={testi.name}
+                  handle={testi.social_media}
+                  image={testi.image}
+                />
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -241,7 +280,7 @@ const Afiliator = () => {
       <section className="py-20 container mx-auto px-6 lg:px-16">
         <div className="bg-linear-to-r from-emerald-800 to-emerald-600 rounded-[3rem] p-12 text-center text-white relative overflow-hidden">
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Mulai Perjalanan Cuanmu
+            Mulailah Perjalanan Cuanmu
           </h2>
           <p className="text-emerald-100 text-lg mb-10 max-w-2xl mx-auto">
             Jangan lewatkan kesempatan menjadi bagian dari mitra sukses kami.

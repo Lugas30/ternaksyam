@@ -46,7 +46,7 @@ export default function RootLayout({
         </Provider>
 
         <Script
-          src="https://app.sandbox.midtrans.com/snap/snap.js"
+          src={process.env.NEXT_PUBLIC_MIDTRANS_URL}
           data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
           strategy="afterInteractive"
         />

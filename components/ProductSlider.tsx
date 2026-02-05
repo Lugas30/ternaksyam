@@ -27,7 +27,7 @@ export default function ProductSliderEmbla() {
   useEffect(() => {
     if (!BASE_API_URL) {
       console.error(
-        "Variabel lingkungan NEXT_PUBLIC_API_URL tidak terdefinisi."
+        "Variabel lingkungan NEXT_PUBLIC_API_URL tidak terdefinisi.",
       );
       setError("Konfigurasi API tidak lengkap.");
       setIsLoading(false);
@@ -64,7 +64,7 @@ export default function ProductSliderEmbla() {
       dragFree: true,
       containScroll: "trimSnaps",
     },
-    [Autoplay({ delay: 4000, stopOnInteraction: true })]
+    [Autoplay({ delay: 4000, stopOnInteraction: true })],
   );
 
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -164,7 +164,7 @@ export default function ProductSliderEmbla() {
 
             {/* CTA */}
             <div className="flex justify-center mt-6">
-              <Link href="/varian">
+              <Link href="/brand-kami">
                 <button className="btn btn-primary hover:bg-secondary border-none transition px-8 py-6 font-bold text-base rounded-full">
                   Lihat Semua Produk
                 </button>

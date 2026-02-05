@@ -8,13 +8,6 @@ import { Search } from "lucide-react";
 
 // --- 1. Definisikan Interface untuk Struktur Data API ---
 
-// Deklarasi global untuk Midtrans Snap
-// declare global {
-//   interface Window {
-//     snap: any;
-//   }
-// }
-
 interface TrackingHistory {
   desc: string;
   date: string;
@@ -54,7 +47,6 @@ interface Transaction {
   address: string;
   resi: string | null;
   payment_method: string;
-  payment_token?: string; // Tambahkan field ini sesuai data API
 }
 
 // --- 2. Helper Functions ---
@@ -89,12 +81,8 @@ const getStatusBadgeClass = (status: string) => {
     case "pending":
       return "bg-yellow-50 text-yellow-700 border border-yellow-200";
     case "success":
-    case "settlement": // Tambahkan case settlement
       return "bg-green-50 text-green-700 border border-green-200";
     case "shipped":
-    case "packaging": // Tambahkan case packaging
-      return "bg-green-50 text-green-700 border border-green-200";
-    case "processing": // Tambahkan case processing
       return "bg-blue-50 text-blue-700 border border-blue-200";
     case "expired":
       return "bg-red-50 text-red-700 border border-red-200";
@@ -148,6 +136,7 @@ const TrackingModal: React.FC<{
 
               <div className="relative">
                 {trackingData?.history.map((step, index) => {
+                  // Mengecek apakah ini adalah item terakhir dalam array
                   const isLastItem = index === trackingData.history.length - 1;
 
                   return (
@@ -156,10 +145,11 @@ const TrackingModal: React.FC<{
                         <div
                           className={`w-3 h-3 rounded-full transition-all duration-300 ${
                             isLastItem
-                              ? "bg-[#155E49] ring-4 ring-green-100"
+                              ? "bg-[#155E49] ring-4 ring-green-100" // Aktif jika item terakhir
                               : "bg-gray-300"
                           }`}
                         ></div>
+                        {/* Garis penghubung tidak muncul setelah item terakhir */}
                         {!isLastItem && (
                           <div className="w-0.5 h-full bg-gray-200 mt-1"></div>
                         )}
@@ -403,53 +393,15 @@ const OrderHistory: React.FC = () => {
     setSelectedTransaction(null);
   };
 
-  // --- Fungsi Load Midtrans Script ---
-  useEffect(() => {
-    const midtransScriptUrl = "https://app.midtrans.com/snap/snap.js";
-    const myMidtransClientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
-
-    let script = document.createElement("script");
-    script.src = midtransScriptUrl;
-    script.setAttribute("data-client-key", myMidtransClientKey || "");
-    script.async = true;
-
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
   // --- Fungsi Payment Gateway (Midtrans) ---
-  const handlePayment = (paymentToken: string) => {
-    if (window.snap) {
-      window.snap.pay(paymentToken, {
-        onSuccess: function (result: any) {
-          console.log("success", result);
-          window.location.reload();
-        },
-        onPending: function (result: any) {
-          console.log("pending", result);
-          window.location.reload();
-        },
-        onError: function (result: any) {
-          console.log("error", result);
-        },
-        onClose: function () {
-          console.log(
-            "customer closed the popup without finishing the payment",
-          );
-        },
-      });
-    } else {
-      alert("Midtrans belum siap, silakan coba lagi.");
-    }
-  };
 
   // --- Fungsi Lacak API Dinamis ---
   const handleTrack = async (resi: string, courier: string) => {
     setIsTrackingLoading(true);
     try {
+      // Membersihkan nama kurir agar dinamis
+      // .trim() menghapus spasi di depan/belakang
+      // .toLowerCase() memastikan format seragam untuk API
       const sanitizedCourier = courier.trim().toLowerCase();
 
       const response = await axios.get(`${API_URL}/track-order`, {
@@ -462,6 +414,7 @@ const OrderHistory: React.FC = () => {
         },
       });
 
+      // Ambil data dari path response: tracking.data
       if (response.data?.tracking?.data) {
         setTrackingData(response.data.tracking.data);
       } else {
@@ -630,11 +583,8 @@ const OrderHistory: React.FC = () => {
                     </div>
 
                     <div className="mt-4 flex justify-end gap-3">
-                      {isPending && order.payment_token && (
-                        <button
-                          onClick={() => handlePayment(order.payment_token!)}
-                          className="text-sm px-4 py-2 bg-[#0E5A45] text-white rounded-lg hover:bg-[#177158] transition-colors shadow-md font-semibold"
-                        >
+                      {isPending && (
+                        <button className="text-sm px-4 py-2 bg-[#0E5A45] text-white rounded-lg hover:bg-[#177158] transition-colors shadow-md font-semibold">
                           Bayar Sekarang
                         </button>
                       )}
